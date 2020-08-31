@@ -1,9 +1,10 @@
 {
   "name": "crushabot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Discord Bot that saves data to Google Sheets",
+  "main": "src",
   "scripts": {
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -11,7 +12,7 @@
     "url": "git+https://github.com/ThelsK/crushabot.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Thels de Kwant",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ThelsK/crushabot/issues"
