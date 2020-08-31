@@ -1,0 +1,1 @@
+const discordBot = require("./discordBot");
