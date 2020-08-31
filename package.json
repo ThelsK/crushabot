@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/ThelsK/crushabot/issues"
   },
-  "homepage": "https://github.com/ThelsK/crushabot#readme"
+  "homepage": "https://github.com/ThelsK/crushabot#readme",
+  "dependencies": {
+    "discord.js": "^12.3.1"
+  }
 }
