@@ -1,4 +1,3 @@
-const discordBot = require("./discordBot")
 const { GoogleSpreadsheet } = require('google-spreadsheet')
 async function loadDocument() {
 	console.log("Attempting to Load Document.")
@@ -13,4 +12,4 @@ async function loadDocument() {
 	console.log("Loaded Document:", document.title)
 }
 
-loadDocument()
+module.exports = loadDocument
