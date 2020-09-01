@@ -1,4 +1,4 @@
 const discordBot = require("./discordBot")
-const loadDocument = require("./loadDocument")
+const { loadDocument } = require("./googleSheet")
 
-loadDocument()
+const document = loadDocument()
