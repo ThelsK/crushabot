@@ -7,6 +7,10 @@ let config // Will store the configuration settings.
 let commands // Will store the available commands.
 let outputSheet // Will store the output worksheet reference.
 
+const getConfig = () => config
+const getCommands = () => commands
+const getOutputSheet = () => outputSheet
+
 async function loadDocument() {
 
 	// Load the Document.
@@ -37,11 +41,17 @@ async function loadDocument() {
 		}
 	})
 
-	// Load the Commands.
-	if (!config.commandsheet) {
-		setIssue("Error: Cannot find configuration property 'commandsheet'.")
-		return
+	// Check for mandatory configuration settings.
+	const mandatoryConfigs = ["commandsheet", "outputsheet", "serverid", "discordtagcolumn"]
+	for (let i in mandatoryConfigs) {
+		mandatoryConfig = mandatoryConfigs[i]
+		if (!config[mandatoryConfig]) {
+			setIssue(`Error: Cannot find configuration property '${mandatoryConfig}'.`)
+			return
+		}
 	}
+
+	// Load the Commands.
 	if (!sheets[config.commandsheet]) {
 		setIssue(`Error: Cannot find worksheet with title '${config.commandsheet}'.`)
 		return
@@ -59,17 +69,14 @@ async function loadDocument() {
 	})
 
 	// Set the Output sheet.
-	if (!config.outputsheet) {
-		setIssue("Error: Cannot find configuration property 'outputsheet'.")
-		return
-	}
 	if (!sheets[config.outputsheet]) {
 		setIssue(`Error: Cannot find worksheet with title '${config.outputsheet}'.`)
 		return
 	}
 	outputSheet = sheets[config.outputsheet]
 
+	// Check for remaining issues.
 	clearIssue()
 }
 
-module.exports = { loadDocument, config, commands, outputSheet }
+module.exports = { loadDocument, getConfig, getCommands, getOutputSheet }

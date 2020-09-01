@@ -1,12 +1,14 @@
-let issue = "Still initializing. Please try again in 10 seconds."
+let issue = "Still initializing. Please try again in one minute."
 
 function setIssue(newIssue) {
 	issue = newIssue
-	console.error("\x1b[31m".concat(text).concat("\x1b[00m"))
+	console.error("\x1b[31m".concat(issue).concat("\x1b[00m"))
 }
 
 function clearIssue() {
 	issue = ""
 }
 
-module.exports = { issue, setIssue, clearIssue }
+const getIssue = () => issue
+
+module.exports = { getIssue, setIssue, clearIssue }
