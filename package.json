@@ -4,7 +4,7 @@
   "description": "Discord Bot that saves data to Google Sheets",
   "main": "src",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ThelsK/crushabot#readme",
   "dependencies": {
-    "discord.js": "^12.3.1"
+    "discord.js": "^12.3.1",
+    "google-spreadsheet": "^3.0.13"
   }
 }
