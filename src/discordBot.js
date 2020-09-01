@@ -1,17 +1,23 @@
 const Discord = require("discord.js")
-const client = new Discord.Client()
+const { discordToken } = require("./environment")
 
-// Report successful login:
-client.on("ready", () => {
-	console.log("Logged in as:", client.user.tag)
-})
+function loadClient() {
+	const client = new Discord.Client()
+	client.on("ready", () => {
+		console.log("Discord Bot connection:", client.user.tag)
+	})
+	client.login(discordToken)
+	return client
+}
 
-// Reply to message:
+
+/*
 client.on("message", msg => {
 	console.log("Received message:", msg)
 	if (msg.content.toLowerCase() === "ping") {
 		msg.reply("Pong")
 	}
 })
+*/
 
-client.login(process.env.DISCORD_TOKEN)
+module.exports = { loadClient }
