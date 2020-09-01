@@ -12,6 +12,7 @@ const getCommands = () => commands
 const getOutputSheet = () => outputSheet
 
 async function loadDocument() {
+	setIssue("Initializing data. Please try again in a couple of seconds.", "silent")
 
 	// Load the Document.
 	try {
@@ -75,8 +76,9 @@ async function loadDocument() {
 	}
 	outputSheet = sheets[config.outputsheet]
 
-	// Check for remaining issues.
+	// Cleanup.
 	clearIssue()
+	console.log("Google Sheets document loaded successfully.")
 }
 
 module.exports = { loadDocument, getConfig, getCommands, getOutputSheet }

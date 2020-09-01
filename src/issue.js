@@ -1,8 +1,10 @@
-let issue = "Still initializing. Please try again in a couple of seconds."
+let issue = "Initial value."
 
-function setIssue(newIssue) {
+function setIssue(newIssue, silent) {
 	issue = newIssue
-	console.error("\x1b[31m".concat(issue).concat("\x1b[00m"))
+	if (!silent) {
+		console.error("\x1b[31m".concat(issue).concat("\x1b[00m"))
+	}
 }
 
 function clearIssue() {
