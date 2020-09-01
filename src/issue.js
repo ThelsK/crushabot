@@ -1,4 +1,4 @@
-let issue = "Still initializing. Please try again in one minute."
+let issue = "Still initializing. Please try again in a couple of seconds."
 
 function setIssue(newIssue) {
 	issue = newIssue

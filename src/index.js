@@ -24,7 +24,7 @@ client.on("message", async msg => {
 	// The !reload command is hardcoded, so its available while the document cannot be reached.
 	if (command === "!reload") {
 		if (msg.author.id === msg.channel.guild.ownerID) {
-			msg.reply("Reloading! Please try issuing another command in one minute.")
+			msg.reply("Reloading! Please try issuing another command in a couple of seconds.")
 			loadDocument()
 		} else {
 			msg.reply("Only the Server Owner may perform the '!reload' command.")
@@ -120,12 +120,15 @@ client.on("message", async msg => {
 		}
 		let reply = getCommand.reply
 		outputSheet.headerValues.forEach(value => {
-			if (outputRow[value] === undefined) {
+			console.log(`${value}:`, typeof outputRow[value], outputRow[value])
+			if (outputRow[value] === undefined || outputRow[value] === "") {
 				reply = `${reply}\n${value}: <blank>`
-			} else if (outputRow[value] === true) {
+			} else if (outputRow[value] === "TRUE") {
 				reply = `${reply}\n${value}: ${getConfig().textenabled || "On"}`
-			} else if (outputRow[value] === false) {
+			} else if (outputRow[value] === "FALSE") {
 				reply = `${reply}\n${value}: ${getConfig().textdisabled || "Off"}`
+			} else if (getConfig().updatedcolumn && value === getConfig().updatedcolumn) {
+				reply = `${reply}\n${value}: ${new Date(Number(outputRow[value])).toUTCString()}`
 			} else {
 				reply = `${reply}\n${value}: ${outputRow[value]}`
 			}
@@ -159,17 +162,17 @@ client.on("message", async msg => {
 		}
 	}
 
-	// Check if the parameter if a boolean.
+	// Check if the parameter is a boolean.
 	if (getCommand.type === "boolean") {
 		parameter = parameter.toLowerCase()
 		if (getConfig().textenabled && parameter === getConfig().textenabled) {
-			parameter === true
+			parameter = true
 		} else if (getConfig().textdisabled && parameter === getConfig().textdisabled) {
-			parameter === false
+			parameter = false
 		} else if (parameter.substr(0, 1) == "y" || parameter.substr(0, 1) == "t" || parameter.substr(0, 1) == "e" || parameter.substr(0, 2) == "on") {
-			parameter === true
+			parameter = true
 		} else if (parameter.substr(0, 1) == "n" || parameter.substr(0, 1) == "f" || parameter.substr(0, 1) == "d" || parameter.substr(0, 2) == "of") {
-			parameter === false
+			parameter = false
 		} else {
 			msg.reply(`Please type '${command} ${getConfig().textenabled || "On"}' or '${command} ${getConfig().textdisabled || "Off"}'.`)
 			return
@@ -186,10 +189,20 @@ client.on("message", async msg => {
 		outputRow[getConfig().discordrankcolumn] = discordRank
 	}
 	if (getConfig().updatedcolumn) {
-		outputRow[getConfig().updatedcolumn] = new Date()
+		outputRow[getConfig().updatedcolumn] = Date.now()
 	}
 	outputRow[getCommand.reference] = parameter
 	await outputRow.save()
 
-	msg.reply(`${getCommand.reference} set to ${parameter}.`)
+	// Report back to the user.
+	if (parameter === true) {
+		parameter = getConfig().textenabled || "On"
+	} else if (parameter === false) {
+		parameter = getConfig().textdisabled || "Off"
+	}
+	if (getCommand.reply) {
+		msg.reply(`${getCommand.reply} ${parameter}`)
+	} else {
+		msg.reply(`${getCommand.reference} set to ${parameter}.`)
+	}
 })
