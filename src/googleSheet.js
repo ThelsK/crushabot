@@ -5,16 +5,22 @@ const { setIssue, clearIssue } = require("./issue")
 const document = new GoogleSpreadsheet(documentId)
 let config // Will store the configuration settings.
 let commands // Will store the available commands.
-let outputSheet // Will store the output worksheet data.
+let outputSheet // Will store the output worksheet reference.
 
 async function loadDocument() {
 
 	// Load the Document.
-	await document.useServiceAccountAuth({
-		client_email: clientEmail,
-		private_key: privateKey
-	})
-	await document.loadInfo()
+	try {
+		await document.useServiceAccountAuth({
+			client_email: clientEmail,
+			private_key: privateKey
+		})
+		await document.loadInfo()
+	}
+	catch {
+		setIssue("Error: Unable to load Google Sheets document.")
+		return
+	}
 	const sheets = document.sheetsByTitle
 	console.log("Google Sheets document:", document.title)
 
