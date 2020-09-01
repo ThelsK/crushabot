@@ -10,14 +10,4 @@ function loadClient() {
 	return client
 }
 
-
-/*
-client.on("message", msg => {
-	console.log("Received message:", msg)
-	if (msg.content.toLowerCase() === "ping") {
-		msg.reply("Pong")
-	}
-})
-*/
-
 module.exports = { loadClient }
