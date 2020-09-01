@@ -178,15 +178,10 @@ client.on("message", async msg => {
 
 	// Create a new row if needed.
 	if (!outputRow) {
-		console.log("Creating new row.")
-		outputRow = await outputSheet.addRow({})
-		console.log("Created new row.")
+		outputRow = await outputSheet.addRow({ [getConfig().discordtagcolumn]: discordTag })
 	}
 
 	// Update the row values.
-	console.log("Outputsheet:", outputSheet)
-	console.log("OutputRow:", outputRow)
-	outputRow[getConfig().discordtagcolumn] = discordTag
 	if (getConfig().discordrankcolumn) {
 		outputRow[getConfig().discordrankcolumn] = discordRank
 	}
