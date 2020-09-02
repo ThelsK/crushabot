@@ -70,9 +70,9 @@ client.on("message", async msg => {
 
 	// Check if the command exists.
 	if (!getCommand) {
-		if (command.substr(0, 1) === "!" && getCommands()["!help"]) {
+		if (command.startsWith("!") && getCommands()["!help"]) {
 			msg.reply(`Unknown command '${command}'. Type '!help' for an overview of available commands.`)
-		} else if (command.substr(0, 1) === "!") {
+		} else if (command.startsWith("!")) {
 			msg.reply(`Unknown command '${command}'.`)
 		}
 		return
@@ -169,9 +169,9 @@ client.on("message", async msg => {
 			parameter = true
 		} else if (getConfig().textdisabled && parameter === getConfig().textdisabled) {
 			parameter = false
-		} else if (parameter.substr(0, 1) == "y" || parameter.substr(0, 1) == "t" || parameter.substr(0, 1) == "e" || parameter.substr(0, 2) == "on") {
+		} else if (parameter.startsWith("y") || parameter.startsWith("t") || parameter.startsWith("e") || parameter.startsWith("on")) {
 			parameter = true
-		} else if (parameter.substr(0, 1) == "n" || parameter.substr(0, 1) == "f" || parameter.substr(0, 1) == "d" || parameter.substr(0, 2) == "of") {
+		} else if (parameter.startsWith("n") || parameter.startsWith("f") || parameter.startsWith("d") || parameter.startsWith("of")) {
 			parameter = false
 		} else {
 			msg.reply(`Please type '${command} ${getConfig().textenabled || "On"}' or '${command} ${getConfig().textdisabled || "Off"}'.`)
