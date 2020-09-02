@@ -17,6 +17,7 @@ client.on("message", async msg => {
 		return
 	}
 
+	// Determine the command and the parameters.
 	const content = msg.content.trim().concat(" ") // Space is added to not confuse commands without parameters.
 	let command = content.substr(0, content.indexOf(" ")).toLowerCase()
 	let parameter = content.substr(content.indexOf(" ") + 1).trim()
@@ -40,7 +41,9 @@ client.on("message", async msg => {
 
 	// If the Server ID doesn't match the serverid setting, report it.
 	if (msg.channel.guild.id !== getConfig().serverid) {
-		msg.reply("Error: Server mismatch. I am not supposed to be on this server.")
+		if (command.startsWith("!")) {
+			msg.reply("Error: Server ID mismatch. I am not supposed to be on this server.")
+		}
 		return
 	}
 
@@ -89,6 +92,19 @@ client.on("message", async msg => {
 		return
 	}
 
+	// Check if the user is of adequate rank.
+	if (getCommand.minrank) {
+		let minrank = msg.guild.roles.cache.find(role => role.name === getCommand.minrank)
+		if (!minrank) {
+			msg.reply(`Error: Minimum rank '${getCommand.minrank}' for command '${command}' not found.`)
+			return
+		}
+		if (minrank.rawPosition > msg.member.roles.highest.rawPosition) {
+			msg.reply(`Only users with rank '${getCommand.minrank}' or higher can use '${command}'.`)
+			return
+		}
+	}
+
 	// Resolve info type commands.
 	if (getCommand.type === "info") {
 		if (!getCommand.reply) {
@@ -109,7 +125,6 @@ client.on("message", async msg => {
 
 	// Check if there is an entry for the current user.
 	const discordTag = `${msg.author.username}#${msg.author.discriminator}`
-	const discordRank = "unknown"
 	let outputRow = outputRows.find(row => row[getConfig().discordtagcolumn] === discordTag)
 
 	// Resolve stats type commands.
@@ -120,7 +135,6 @@ client.on("message", async msg => {
 		}
 		let reply = getCommand.reply
 		outputSheet.headerValues.forEach(value => {
-			console.log(`${value}:`, typeof outputRow[value], outputRow[value])
 			if (outputRow[value] === undefined || outputRow[value] === "") {
 				reply = `${reply}\n${value}: <blank>`
 			} else if (outputRow[value] === "TRUE") {
@@ -181,17 +195,23 @@ client.on("message", async msg => {
 
 	// Create a new row if needed.
 	if (!outputRow) {
-		outputRow = await outputSheet.addRow({ [getConfig().discordtagcolumn]: discordTag })
+		outputRow = await outputSheet.addRow({ [getConfig().discordtagcolumn]: String(discordTag) })
 	}
 
 	// Update the row values.
+	if (getConfig().discordnamecolumn) {
+		outputRow[getConfig().discordnamecolumn] = String(msg.member.nickname)
+	}
 	if (getConfig().discordrankcolumn) {
-		outputRow[getConfig().discordrankcolumn] = discordRank
+		outputRow[getConfig().discordrankcolumn] = String(msg.member.roles.highest.name)
+	}
+	if (getConfig().rankvaluecolumn) {
+		outputRow[getConfig().rankvaluecolumn] = String(msg.member.roles.highest.rawPosition)
 	}
 	if (getConfig().updatedcolumn) {
-		outputRow[getConfig().updatedcolumn] = Date.now()
+		outputRow[getConfig().updatedcolumn] = String(Date.now())
 	}
-	outputRow[getCommand.reference] = parameter
+	outputRow[getCommand.reference] = String(parameter)
 	await outputRow.save()
 
 	// Report back to the user.

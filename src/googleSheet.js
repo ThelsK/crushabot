@@ -61,11 +61,7 @@ async function loadDocument() {
 	commands = []
 	commandRows.forEach(row => {
 		if (row.command) {
-			commands[row.command] = {
-				type: row.type,
-				reference: row.reference,
-				reply: row.reply
-			}
+			commands[row.command] = row
 		}
 	})
 
