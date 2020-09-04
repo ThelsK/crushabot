@@ -200,7 +200,7 @@ client.on("message", async msg => {
 
 	// Update the row values.
 	if (getConfig().discordnamecolumn) {
-		outputRow[getConfig().discordnamecolumn] = String(msg.member.nickname)
+		outputRow[getConfig().discordnamecolumn] = String(msg.member.nickname || msg.author.username)
 	}
 	if (getConfig().discordrankcolumn) {
 		outputRow[getConfig().discordrankcolumn] = String(msg.member.roles.highest.name)
@@ -209,7 +209,7 @@ client.on("message", async msg => {
 		outputRow[getConfig().rankvaluecolumn] = String(msg.member.roles.highest.rawPosition)
 	}
 	if (getConfig().updatedcolumn) {
-		outputRow[getConfig().updatedcolumn] = String(Date.now())
+		outputRow[getConfig().updatedcolumn] = Date.now()
 	}
 	outputRow[getCommand.reference] = String(parameter)
 	await outputRow.save()
