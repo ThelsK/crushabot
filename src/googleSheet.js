@@ -45,7 +45,7 @@ async function loadDocument() {
 	// Check for mandatory configuration settings.
 	const mandatoryConfigs = ["commandsheet", "outputsheet", "serverid", "discordtagcolumn"]
 	for (let i in mandatoryConfigs) {
-		mandatoryConfig = mandatoryConfigs[i]
+		const mandatoryConfig = mandatoryConfigs[i]
 		if (!config[mandatoryConfig]) {
 			setIssue(`Error: Cannot find configuration property '${mandatoryConfig}'.`)
 			return

@@ -170,6 +170,17 @@ client.on("message", async msg => {
 
 	// Check if the parameter is a string.
 	if (com.type === "string") {
+		if (com.forbidden) {
+			const characters = com.forbidden.split('')
+			for (let i in characters) {
+				const character = characters[i]
+				if (parameter.includes(character)) {
+					msg.reply(`The text for '${command}' may not include the ' ${character} ' character.`)
+					return
+				}
+			}
+		}
+
 		if (com.minimum && parameter.length < Number(com.minimum)) {
 			msg.reply(`The text for '${command}' must be at least ${com.minimum} characters long.`)
 			return
