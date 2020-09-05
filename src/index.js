@@ -53,26 +53,26 @@ client.on("message", async msg => {
 	}
 
 	// Check if the command is an alias command.
-	let getCommand = getCommands()[command]
-	if (getCommand && getCommand.type === "alias") {
-		if (!getCommand.reference) {
+	let com = getCommands()[command]
+	if (com && com.type === "alias") {
+		if (!com.reference) {
 			msg.reply(`Error: No reference set for alias command '${command}'.`)
 			return
 		}
-		if (!getCommands()[getCommand.reference]) {
-			msg.reply(`Error: Alias command '${command}' refers to an unknown command '${getCommand.reference}'.`)
+		if (!getCommands()[com.reference]) {
+			msg.reply(`Error: Alias command '${command}' refers to an unknown command '${com.reference}'.`)
 			return
 		}
-		if (getCommands()[getCommand.reference].type === "alias") {
-			msg.reply(`Error: Alias command '${command}' refers to another alias command '${getCommand.reference}'.`)
+		if (getCommands()[com.reference].type === "alias") {
+			msg.reply(`Error: Alias command '${command}' refers to another alias command '${com.reference}'.`)
 			return
 		}
-		command = getCommand.reference
-		getCommand = getCommands()[command]
+		command = com.reference
+		com = getCommands()[command]
 	}
 
 	// Check if the command exists.
-	if (!getCommand) {
+	if (!com) {
 		if (command.startsWith("!") && getCommands()["!help"]) {
 			msg.reply(`Unknown command '${command}'. Type '!help' for an overview of available commands.`)
 		} else if (command.startsWith("!")) {
@@ -82,41 +82,42 @@ client.on("message", async msg => {
 	}
 
 	// Check if the command has a valid command type.
-	if (!getCommand.type) {
+	if (!com.type) {
 		msg.reply(`Error: No command type set for '${command}'.`)
 		return
 	}
 	const types = ["info", "stats", "string", "integer", "boolean"]
-	if (!types.find(type => type === getCommand.type)) {
-		msg.reply(`Error: Unknown command type '${getCommand.type}' set for '${command}'.`)
+	if (!types.find(type => type === com.type)) {
+		msg.reply(`Error: Unknown command type '${com.type}' set for '${command}'.`)
 		return
 	}
 
 	// Check if the user is of adequate rank.
-	if (getCommand.minrank) {
-		let minrank = msg.guild.roles.cache.find(role => role.name === getCommand.minrank)
+	if (com.minrank) {
+		let minrank = msg.guild.roles.cache.find(role => role.name === com.minrank)
 		if (!minrank) {
-			msg.reply(`Error: Minimum rank '${getCommand.minrank}' for command '${command}' not found.`)
+			msg.reply(`Error: Minimum rank '${com.minrank}' for command '${command}' not found.`)
 			return
 		}
 		if (minrank.rawPosition > msg.member.roles.highest.rawPosition) {
-			msg.reply(`Only users with rank '${getCommand.minrank}' or higher can use '${command}'.`)
+			msg.reply(`Only users with rank '${com.minrank}' or higher can use '${command}'.`)
 			return
 		}
 	}
 
 	// Resolve info type commands.
-	if (getCommand.type === "info") {
-		if (!getCommand.reply) {
+	if (com.type === "info") {
+		if (!com.reply) {
 			msg.reply(`Error: No reply set for '${command}'.`)
 		} else {
-			msg.reply(getCommand.reply)
+			msg.reply(com.reply)
 		}
 		return
 	}
 
 	// Load the output Sheet, and check if the Discord Tag column exists.
 	const outputSheet = getOutputSheet()
+	await outputSheet.loadHeaderRow() // To make sure the admin user did not swap columns around.
 	const outputRows = await outputSheet.getRows()
 	if (!outputSheet.headerValues.find(value => value === getConfig().discordtagcolumn)) {
 		msg.reply(`Error: Discord Tag column header '${getConfig().discordtagcolumn}' not found.`)
@@ -128,36 +129,36 @@ client.on("message", async msg => {
 	let outputRow = outputRows.find(row => row[getConfig().discordtagcolumn] === discordTag)
 
 	// Resolve stats type commands.
-	if (getCommand.type === "stats") {
+	if (com.type === "stats") {
 		if (!outputRow) {
 			msg.reply(`User '${discordTag}' not found.`)
 			return
 		}
-		let reply = getCommand.reply
+		let reply = com.reply
 		outputSheet.headerValues.forEach(value => {
-			if (outputRow[value] === undefined || outputRow[value] === "") {
-				reply = `${reply}\n${value}: <blank>`
-			} else if (outputRow[value] === "TRUE") {
-				reply = `${reply}\n${value}: ${getConfig().textenabled || "On"}`
+			parameter = outputRow[value]
+			if (parameter === undefined || parameter === "") {
+				parameter = "<blank>"
+			} else if (parameter === "TRUE") {
+				parameter = getConfig().textenabled || "On"
 			} else if (outputRow[value] === "FALSE") {
-				reply = `${reply}\n${value}: ${getConfig().textdisabled || "Off"}`
+				parameter = getConfig().textdisabled || "Off"
 			} else if (getConfig().updatedcolumn && value === getConfig().updatedcolumn) {
-				reply = `${reply}\n${value}: ${new Date(Number(outputRow[value])).toUTCString()}`
-			} else {
-				reply = `${reply}\n${value}: ${outputRow[value]}`
+				parameter = new Date(Number(outputRow[value])).toUTCString()
 			}
+			reply = `${reply}\n${value}: ${parameter}`
 		})
 		msg.reply(reply)
 		return
 	}
 
 	// Check if the reference column exists.
-	if (!getCommand.reference) {
+	if (!com.reference) {
 		msg.reply(`Error: No reference column set for input command '${command}'.`)
 		return
 	}
-	if (!outputSheet.headerValues.find(value => value === getCommand.reference)) {
-		msg.reply(`Error: Reference column header '${getCommand.reference}' for input command '${command}' not found.`)
+	if (!outputSheet.headerValues.find(value => value === com.reference)) {
+		msg.reply(`Error: Reference column header '${com.reference}' for input command '${command}' not found.`)
 		return
 	}
 
@@ -167,17 +168,37 @@ client.on("message", async msg => {
 		return
 	}
 
+	// Check if the parameter is a string.
+	if (com.type === "string") {
+		if (com.minimum && parameter.length < Number(com.minimum)) {
+			msg.reply(`The text for '${command}' must be at least ${com.minimum} characters long.`)
+			return
+		}
+		if (com.maximum && parameter.length > Number(com.maximum)) {
+			msg.reply(`The text for '${command}' must be at most ${com.maximum} characters long.`)
+			return
+		}
+	}
+
 	// Check if the parameter is a number.
-	if (getCommand.type === "integer") {
+	if (com.type === "integer") {
 		parameter = Number(parameter)
 		if (isNaN(parameter)) {
 			msg.reply(`Please type '${command} value'. Value must be a number.`)
 			return
 		}
+		if (com.minimum && parameter < Number(com.minimum)) {
+			msg.reply(`The number for '${command}' must be at least ${com.minimum}.`)
+			return
+		}
+		if (com.maximum && parameter > Number(com.maximum)) {
+			msg.reply(`The number for '${command}' must be at most ${com.maximum}.`)
+			return
+		}
 	}
 
 	// Check if the parameter is a boolean.
-	if (getCommand.type === "boolean") {
+	if (com.type === "boolean") {
 		parameter = parameter.toLowerCase()
 		if (getConfig().textenabled && parameter === getConfig().textenabled) {
 			parameter = true
@@ -211,7 +232,7 @@ client.on("message", async msg => {
 	if (getConfig().updatedcolumn) {
 		outputRow[getConfig().updatedcolumn] = Date.now()
 	}
-	outputRow[getCommand.reference] = String(parameter)
+	outputRow[com.reference] = String(parameter)
 	await outputRow.save()
 
 	// Report back to the user.
@@ -220,9 +241,9 @@ client.on("message", async msg => {
 	} else if (parameter === false) {
 		parameter = getConfig().textdisabled || "Off"
 	}
-	if (getCommand.reply) {
-		msg.reply(`${getCommand.reply} ${parameter}`)
+	if (com.reply) {
+		msg.reply(`${com.reply} ${parameter}`)
 	} else {
-		msg.reply(`${getCommand.reference} set to ${parameter}.`)
+		msg.reply(`${com.reference} set to ${parameter}.`)
 	}
 })
