@@ -13,7 +13,7 @@ client.on("message", async msg => {
 
 	// Ignore Private Messages.
 	if (!msg.channel.guild) {
-		msg.reply("This Bot only accepts channel messages, not private messages.")
+		msg.reply(`This Bot only accepts channel messages, not private messages.`)
 		return
 	}
 
@@ -25,10 +25,10 @@ client.on("message", async msg => {
 	// The !reload command is hardcoded, so its available while the document cannot be reached.
 	if (command === "!reload") {
 		if (msg.author.id === msg.channel.guild.ownerID) {
-			msg.reply("Reloading! Please try issuing another command in a couple of seconds.")
+			msg.reply(`Reloading! Please try issuing another command in a couple of seconds.`)
 			loadDocument()
 		} else {
-			msg.reply("Only the Server Owner may perform the '!reload' command.")
+			msg.reply(`Only the Server Owner may perform the '!reload' command.`)
 		}
 		return
 	}
@@ -40,15 +40,16 @@ client.on("message", async msg => {
 	}
 
 	// If the Server ID doesn't match the serverid setting, report it.
-	if (msg.channel.guild.id !== getConfig().serverid) {
+	const config = getConfig()
+	if (msg.channel.guild.id !== config.serverid) {
 		if (command.startsWith("!")) {
-			msg.reply("Error: Server ID mismatch. I am not supposed to be on this server.")
+			msg.reply(`Error: Server ID mismatch. I am not supposed to be on this server.`)
 		}
 		return
 	}
 
 	// If the channel doesn't match, ignore the message.
-	if (getConfig().inputchannel && msg.channel.name !== getConfig().inputchannel) {
+	if (config.inputchannel && msg.channel.name !== config.inputchannel) {
 		return
 	}
 
@@ -86,7 +87,7 @@ client.on("message", async msg => {
 		msg.reply(`Error: No command type set for '${command}'.`)
 		return
 	}
-	const types = ["info", "stats", "string", "integer", "boolean"]
+	const types = ["info", "data", "flag", "text", "number", "date"]
 	if (!types.find(type => type === com.type)) {
 		msg.reply(`Error: Unknown command type '${com.type}' set for '${command}'.`)
 		return
@@ -119,34 +120,49 @@ client.on("message", async msg => {
 	const outputSheet = getOutputSheet()
 	await outputSheet.loadHeaderRow() // To make sure the admin user did not swap columns around.
 	const outputRows = await outputSheet.getRows()
-	if (!outputSheet.headerValues.find(value => value === getConfig().discordtagcolumn)) {
-		msg.reply(`Error: Discord Tag column header '${getConfig().discordtagcolumn}' not found.`)
+	if (!outputSheet.headerValues.find(value => value === config.discordtagcolumn)) {
+		msg.reply(`Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
 		return
 	}
 
 	// Check if there is an entry for the current user.
 	const discordTag = `${msg.author.username}#${msg.author.discriminator}`
-	let outputRow = outputRows.find(row => row[getConfig().discordtagcolumn] === discordTag)
+	let outputRow = outputRows.find(row => row[config.discordtagcolumn] === discordTag)
 
 	// Resolve stats type commands.
-	if (com.type === "stats") {
-		if (!outputRow) {
-			msg.reply(`User '${discordTag}' not found.`)
+	if (com.type === "data") {
+		if (!outputRow && getCommands()["!help"]) {
+			msg.reply(`No data found for user '${discordTag}'. Type '!help' for an overview of available commands.`)
+			return
+		} else if (!outputRow) {
+			msg.reply(`No data found for user '${discordTag}'.`)
 			return
 		}
-		let reply = com.reply
+
+		const outputType = outputRows.find(row => row[config.discordtagcolumn] === "type")
+		if (!outputType) {
+			msg.reply(`Error: Output row with Discord Tag 'type' not found.`)
+			return
+		}
+		const outputDesc = outputRows.find(row => row[config.discordtagcolumn] === "description")
+		if (!outputDesc) {
+			msg.reply(`Error: Output row with Discord Tag 'description' not found.`)
+			return
+		}
+
+		let reply = `${com.reply || "Data for user:"} ${discordTag}`
 		outputSheet.headerValues.forEach(value => {
-			parameter = outputRow[value]
-			if (parameter === undefined || parameter === "") {
-				parameter = "<blank>"
-			} else if (parameter === "TRUE") {
-				parameter = getConfig().textenabled || "On"
-			} else if (outputRow[value] === "FALSE") {
-				parameter = getConfig().textdisabled || "Off"
-			} else if (getConfig().updatedcolumn && value === getConfig().updatedcolumn) {
-				parameter = new Date(Number(outputRow[value])).toUTCString()
+			if (outputType[value] === "string") {
+				reply = `${reply}\n${outputDesc[value] || value} ${outputRow[value] || "<blank>"}`
+			} else if (outputType[value] === "number") {
+				reply = `${reply}\n${outputDesc[value] || value} ${Number(outputRow[value]) || "0"}`
+			} else if (outputType[value] === "boolean" && outputRow[value] === "TRUE") {
+				reply = `${reply}\n${outputDesc[value] || value} ${config.textenabled || "On"}`
+			} else if (outputType[value] === "boolean") {
+				reply = `${reply}\n${outputDesc[value] || value} ${config.textdisabled || "Off"}`
+			} else if (outputType[value] === "date") {
+				reply = `${reply}\n${outputDesc[value] || value} ${new Date(Number(outputRow[value]) || outputRow[value]).toUTCString()}`
 			}
-			reply = `${reply}\n${value}: ${parameter}`
 		})
 		msg.reply(reply)
 		return
@@ -171,7 +187,7 @@ client.on("message", async msg => {
 	// Check if the parameter is a string.
 	if (com.type === "string") {
 		if (com.forbidden) {
-			const characters = com.forbidden.split('')
+			const characters = com.forbidden.split("")
 			for (let i in characters) {
 				const character = characters[i]
 				if (parameter.includes(character)) {
@@ -211,46 +227,50 @@ client.on("message", async msg => {
 	// Check if the parameter is a boolean.
 	if (com.type === "boolean") {
 		parameter = parameter.toLowerCase()
-		if (getConfig().textenabled && parameter === getConfig().textenabled) {
+		if (config.textenabled && parameter === config.textenabled) {
 			parameter = true
-		} else if (getConfig().textdisabled && parameter === getConfig().textdisabled) {
+		} else if (config.textdisabled && parameter === config.textdisabled) {
 			parameter = false
 		} else if (parameter.startsWith("y") || parameter.startsWith("t") || parameter.startsWith("e") || parameter.startsWith("on")) {
 			parameter = true
 		} else if (parameter.startsWith("n") || parameter.startsWith("f") || parameter.startsWith("d") || parameter.startsWith("of")) {
 			parameter = false
 		} else {
-			msg.reply(`Please type '${command} ${getConfig().textenabled || "On"}' or '${command} ${getConfig().textdisabled || "Off"}'.`)
+			msg.reply(`Please type '${command} ${config.textenabled || "On"}' or '${command} ${config.textdisabled || "Off"}'.`)
 			return
 		}
 	}
 
 	// Create a new row if needed.
 	if (!outputRow) {
-		outputRow = await outputSheet.addRow({ [getConfig().discordtagcolumn]: String(discordTag) })
+		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) })
 	}
 
 	// Update the row values.
-	if (getConfig().discordnamecolumn) {
-		outputRow[getConfig().discordnamecolumn] = String(msg.member.nickname || msg.author.username)
+	const datenow = Date.now()
+	if (config.discordnamecolumn) {
+		outputRow[config.discordnamecolumn] = String(msg.member.nickname || msg.author.username)
 	}
-	if (getConfig().discordrankcolumn) {
-		outputRow[getConfig().discordrankcolumn] = String(msg.member.roles.highest.name)
+	if (config.discordrankcolumn) {
+		outputRow[config.discordrankcolumn] = String(msg.member.roles.highest.name)
 	}
-	if (getConfig().rankvaluecolumn) {
-		outputRow[getConfig().rankvaluecolumn] = String(msg.member.roles.highest.rawPosition)
+	if (config.rankvaluecolumn) {
+		outputRow[config.rankvaluecolumn] = String(msg.member.roles.highest.rawPosition)
 	}
-	if (getConfig().updatedcolumn) {
-		outputRow[getConfig().updatedcolumn] = Date.now()
+	if (config.lastupdatedcolumn) {
+		outputRow[config.lastupdatedcolumn] = new Date(datenow).toUTCString()
+	}
+	if (config.updatedvaluecolumn) {
+		outputRow[config.updatedvaluecolumn] = datenow
 	}
 	outputRow[com.reference] = String(parameter)
 	await outputRow.save()
 
 	// Report back to the user.
 	if (parameter === true) {
-		parameter = getConfig().textenabled || "On"
+		parameter = config.textenabled || "On"
 	} else if (parameter === false) {
-		parameter = getConfig().textdisabled || "Off"
+		parameter = config.textdisabled || "Off"
 	}
 	if (com.reply) {
 		msg.reply(`${com.reply} ${parameter}`)

@@ -12,7 +12,7 @@ const getCommands = () => commands
 const getOutputSheet = () => outputSheet
 
 async function loadDocument() {
-	setIssue("Initializing data. Please try again in a couple of seconds.", "silent")
+	setIssue(`Initializing data. Please try again in a couple of seconds.`, "silent")
 
 	// Load the Document.
 	try {
@@ -23,7 +23,7 @@ async function loadDocument() {
 		await document.loadInfo()
 	}
 	catch {
-		setIssue("Error: Unable to load Google Sheets document.")
+		setIssue(`Error: Unable to load Google Sheets document.`)
 		return
 	}
 	const sheets = document.sheetsByTitle
@@ -31,7 +31,7 @@ async function loadDocument() {
 
 	// Load the Configuration.
 	if (!sheets.botconfig) {
-		setIssue("Error: Cannot find worksheet with title 'botconfig'.")
+		setIssue(`Error: Cannot find worksheet with title 'botconfig'.`)
 		return
 	}
 	const configRows = await sheets.botconfig.getRows()
@@ -74,7 +74,7 @@ async function loadDocument() {
 
 	// Cleanup.
 	clearIssue()
-	console.log("Google Sheets document loaded successfully.")
+	console.log(`Google Sheets document loaded successfully.`)
 }
 
 module.exports = { loadDocument, getConfig, getCommands, getOutputSheet }
