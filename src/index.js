@@ -152,14 +152,14 @@ client.on("message", async msg => {
 
 		let reply = `${com.reply || "Data for user:"} ${discordTag}`
 		outputSheet.headerValues.forEach(value => {
-			if (outputType[value] === "string") {
+			if (outputType[value] === "flag" && outputRow[value] === "TRUE") {
+				reply = `${reply}\n${outputDesc[value] || value} ${config.textenabled || "On"}`
+			} else if (outputType[value] === "flag") {
+				reply = `${reply}\n${outputDesc[value] || value} ${config.textdisabled || "Off"}`
+			} else if (outputType[value] === "text") {
 				reply = `${reply}\n${outputDesc[value] || value} ${outputRow[value] || "<blank>"}`
 			} else if (outputType[value] === "number") {
 				reply = `${reply}\n${outputDesc[value] || value} ${Number(outputRow[value]) || "0"}`
-			} else if (outputType[value] === "boolean" && outputRow[value] === "TRUE") {
-				reply = `${reply}\n${outputDesc[value] || value} ${config.textenabled || "On"}`
-			} else if (outputType[value] === "boolean") {
-				reply = `${reply}\n${outputDesc[value] || value} ${config.textdisabled || "Off"}`
 			} else if (outputType[value] === "date") {
 				reply = `${reply}\n${outputDesc[value] || value} ${new Date(Number(outputRow[value]) || outputRow[value]).toUTCString()}`
 			}
@@ -184,8 +184,25 @@ client.on("message", async msg => {
 		return
 	}
 
-	// Check if the parameter is a string.
-	if (com.type === "string") {
+	// Check if the parameter is a flag.
+	if (com.type === "flag") {
+		parameter = parameter.toLowerCase()
+		if (config.textenabled && parameter === config.textenabled.toLowerCase()) {
+			parameter = true
+		} else if (config.textdisabled && parameter === config.textdisabled.toLowerCase()) {
+			parameter = false
+		} else if (parameter.startsWith("y") || parameter.startsWith("t") || parameter.startsWith("e") || parameter.startsWith("on")) {
+			parameter = true
+		} else if (parameter.startsWith("n") || parameter.startsWith("f") || parameter.startsWith("d") || parameter.startsWith("of")) {
+			parameter = false
+		} else {
+			msg.reply(`Please type '${command} ${config.textenabled || "On"}' or '${command} ${config.textdisabled || "Off"}'.`)
+			return
+		}
+	}
+
+	// Check if the parameter is a text.
+	if (com.type === "text") {
 		if (com.forbidden) {
 			const characters = com.forbidden.split("")
 			for (let i in characters) {
@@ -208,8 +225,12 @@ client.on("message", async msg => {
 	}
 
 	// Check if the parameter is a number.
-	if (com.type === "integer") {
+	if (com.type === "number") {
 		parameter = Number(parameter)
+		if (com.forbidden && !Number.isInteger(parameter)) {
+			msg.reply(`Please type '${command} value'. Value must be a round number.`)
+			return
+		}
 		if (isNaN(parameter)) {
 			msg.reply(`Please type '${command} value'. Value must be a number.`)
 			return
@@ -224,30 +245,12 @@ client.on("message", async msg => {
 		}
 	}
 
-	// Check if the parameter is a boolean.
-	if (com.type === "boolean") {
-		parameter = parameter.toLowerCase()
-		if (config.textenabled && parameter === config.textenabled) {
-			parameter = true
-		} else if (config.textdisabled && parameter === config.textdisabled) {
-			parameter = false
-		} else if (parameter.startsWith("y") || parameter.startsWith("t") || parameter.startsWith("e") || parameter.startsWith("on")) {
-			parameter = true
-		} else if (parameter.startsWith("n") || parameter.startsWith("f") || parameter.startsWith("d") || parameter.startsWith("of")) {
-			parameter = false
-		} else {
-			msg.reply(`Please type '${command} ${config.textenabled || "On"}' or '${command} ${config.textdisabled || "Off"}'.`)
-			return
-		}
-	}
-
 	// Create a new row if needed.
 	if (!outputRow) {
 		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) })
 	}
 
 	// Update the row values.
-	const datenow = Date.now()
 	if (config.discordnamecolumn) {
 		outputRow[config.discordnamecolumn] = String(msg.member.nickname || msg.author.username)
 	}
@@ -258,10 +261,10 @@ client.on("message", async msg => {
 		outputRow[config.rankvaluecolumn] = String(msg.member.roles.highest.rawPosition)
 	}
 	if (config.lastupdatedcolumn) {
-		outputRow[config.lastupdatedcolumn] = new Date(datenow).toUTCString()
+		outputRow[config.lastupdatedcolumn] = new Date(Date.now()).toUTCString()
 	}
 	if (config.updatedvaluecolumn) {
-		outputRow[config.updatedvaluecolumn] = datenow
+		outputRow[config.updatedvaluecolumn] = Date.now()
 	}
 	outputRow[com.reference] = String(parameter)
 	await outputRow.save()
@@ -272,9 +275,5 @@ client.on("message", async msg => {
 	} else if (parameter === false) {
 		parameter = config.textdisabled || "Off"
 	}
-	if (com.reply) {
-		msg.reply(`${com.reply} ${parameter}`)
-	} else {
-		msg.reply(`${com.reference} set to ${parameter}.`)
-	}
+	msg.reply(`${com.reply || `${com.reference} set to`} ${parameter}`)
 })
