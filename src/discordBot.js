@@ -10,4 +10,8 @@ function loadClient() {
 	return client
 }
 
-module.exports = { loadClient }
+function msgReply(msg, text) {
+	msg.reply(text)
+}
+
+module.exports = { loadClient, msgReply }
