@@ -216,14 +216,27 @@ client.on("message", async msg => {
 				}
 			}
 		}
-
-		if (com.minimum && parameter.length < Number(com.minimum)) {
-			msgReply(msg, `The text for '${command}' must be at least ${com.minimum} characters long.`)
-			return
+		if (com.minimum) {
+			const minlength = Number(com.minimum)
+			if (isNaN(minlength)) {
+				msgReply(msg, `Error: Minimum length '${com.minimum}' for input command '${command}' is not a number.`)
+				return
+			}
+			if (parameter.length < minlength) {
+				msgReply(msg, `The text for '${command}' must be ${minlength} or more characters.`)
+				return
+			}
 		}
-		if (com.maximum && parameter.length > Number(com.maximum)) {
-			msgReply(msg, `The text for '${command}' must be at most ${com.maximum} characters long.`)
-			return
+		if (com.maximum) {
+			const maxlength = Number(com.maximum)
+			if (isNaN(maxlength)) {
+				msgReply(msg, `Error: Maximum length '${com.maximum}' for input command '${command}' is not a number.`)
+				return
+			}
+			if (parameter.length > maxlength) {
+				msgReply(msg, `The text for '${command}' must be ${maxlength} or less characters.`)
+				return
+			}
 		}
 	}
 
@@ -238,13 +251,27 @@ client.on("message", async msg => {
 			msgReply(msg, `Please type '${command} value'. Value must be a number.`)
 			return
 		}
-		if (com.minimum && parameter < Number(com.minimum)) {
-			msgReply(msg, `The number for '${command}' must be at least ${com.minimum}.`)
-			return
+		if (com.minimum) {
+			const minvalue = Number(com.minimum)
+			if (isNaN(minvalue)) {
+				msgReply(msg, `Error: Minimum value '${com.minimum}' for input command '${command}' is not a number.`)
+				return
+			}
+			if (parameter < minvalue) {
+				msgReply(msg, `The value for '${command}' must be ${minvalue} or more.`)
+				return
+			}
 		}
-		if (com.maximum && parameter > Number(com.maximum)) {
-			msgReply(msg, `The number for '${command}' must be at most ${com.maximum}.`)
-			return
+		if (com.maximum) {
+			const maxvalue = Number(com.maximum)
+			if (isNaN(maxvalue)) {
+				msgReply(msg, `Error: Maximum value '${com.maximum}' for input command '${command}' is not a number.`)
+				return
+			}
+			if (parameter > maxvalue) {
+				msgReply(msg, `The value for '${command}' must be ${maxvalue} or less.`)
+				return
+			}
 		}
 	}
 
@@ -258,7 +285,7 @@ client.on("message", async msg => {
 		if (com.minimum) {
 			const mindate = getUTCDate(com.minimum)
 			if (isNaN(mindate)) {
-				msgReply(msg, `Error: Minimum value '${com.mindate}' for input command '${command}' is not a date.`)
+				msgReply(msg, `Error: Minimum value '${com.minimum}' for input command '${command}' is not a date.`)
 				return
 			}
 			if (date.getTime() < mindate.getTime()) {
@@ -269,7 +296,7 @@ client.on("message", async msg => {
 		if (com.maximum) {
 			const maxdate = getUTCDate(com.maximum)
 			if (isNaN(maxdate)) {
-				msgReply(msg, `Error: Maximum value '${com.maxdate}' for input command '${command}' is not a date.`)
+				msgReply(msg, `Error: Maximum value '${com.maximum}' for input command '${command}' is not a date.`)
 				return
 			}
 			if (date.getTime() > maxdate.getTime()) {
