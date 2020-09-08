@@ -2,7 +2,9 @@ const dateFormat = require("dateformat")
 const { getConfig } = require("./googleSheet")
 
 function getUTCDate(text) {
+	console.log("text:", text)
 	const date = new Date(text)
+	console.log("date:", date)
 	if (isNaN(date.getTime())) {
 		return NaN
 	}
@@ -12,8 +14,8 @@ function getUTCDate(text) {
 }
 
 function formatDate(date) {
-	const format = getConfig().dateformat || "UTC:dddd dd mmmm yyyy, HH:MM:ss"
-	return dateFormat(date, `UTC: ${format}`).trim()
+	const format = getConfig().dateformat || "dddd dd mmmm yyyy, HH:MM:ss"
+	return dateFormat(date, `UTC:${format}`)
 }
 
 module.exports = { getUTCDate, formatDate }

@@ -1,62 +1,60 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet')
+const { GoogleSpreadsheet } = require("google-spreadsheet")
 const { clientEmail, privateKey, documentId, botConfig } = require("./environment")
-const { setIssue, clearIssue } = require("./issue")
+const { reportError } = require("./error")
 
 const document = new GoogleSpreadsheet(documentId)
-let config // Will store the configuration settings.
-let commands // Will store the available commands.
+let config = [] // Will store the configuration settings.
+let commands = [] // Will store the available commands.
 let outputSheet // Will store the output worksheet reference.
+let lastLoad = 0 // Will track when the Google Sheet document was last loaded.
 
 const getConfig = () => config
 const getCommands = () => commands
 const getOutputSheet = () => outputSheet
 
-async function loadDocument() {
-	setIssue(`Initializing data. Please try again in a couple of seconds.`, "silent")
-	config = []
-	commands = []
-	outputsheet = null
-
-	// Check the Environment variables.
-	if (!clientEmail) {
-		setIssue(`Error: ENV variable GOOGLE_CLIENT_EMAIL not set.`)
-		return
-	}
-	if (!privateKey) {
-		setIssue(`Error: ENV variable GOOGLE_PRIVATE_KEY not set.`)
-		return
-	}
-	if (!documentId) {
-		setIssue(`Error: ENV variable GOOGLE_DOCUMENT_ID not set.`)
-		return
-	}
+async function authServiceWorker() {
 
 	// Authorize the Service Worker.
 	await document.useServiceAccountAuth({
 		client_email: clientEmail,
 		private_key: privateKey
 	}).catch(error => {
-		setIssue(`Error: Unable to authorize the Google service worker.`)
+		reportError(`Error: Unable to authorize the Google service worker.`)
 		throw error
 	})
+
+	return true
+}
+
+async function loadGoogleSheet() {
+
+	// Only allow the document to be loaded once per ten minutes.
+	if (Date.now() < lastLoad + 600000) {
+		// Always refresh the header rows of the output sheet.
+		if (outputSheet) {
+			await outputSheet.loadHeaderRow()
+		}
+		return true
+	}
+	lastLoad = Date.now()
 
 	// Load the Document.
 	await document.loadInfo().catch(error => {
-		setIssue(`Error: Unable to load the Google Sheets document.`)
+		reportError(`Error: Unable to load the Google Sheets document.`)
 		throw error
 	})
 	const sheets = document.sheetsByTitle
-	console.log("Google Sheets document:", document.title)
 
 	// Load the Configuration.
 	if (!sheets[botConfig]) {
-		setIssue(`Error: Cannot find worksheet with title '${botConfig}'.`)
+		reportError(`Error: Cannot find configuration worksheet with title '${botConfig}'.`)
 		return
 	}
 	const configRows = await sheets.botconfig.getRows().catch(error => {
-		setIssue(`Error: Unable to load configuration from the Google Sheets document.`)
+		reportError(`Error: Unable to load configuration from the Google Sheets document.`)
 		throw error
 	})
+	config = []
 	configRows.forEach(row => {
 		if (row.property) {
 			config[row.property] = row.value
@@ -68,20 +66,21 @@ async function loadDocument() {
 	for (let i in mandatoryConfigs) {
 		const mandatoryConfig = mandatoryConfigs[i]
 		if (!config[mandatoryConfig]) {
-			setIssue(`Error: Cannot find configuration property '${mandatoryConfig}'.`)
+			reportError(`Error: Cannot find configuration property '${mandatoryConfig}'.`)
 			return
 		}
 	}
 
 	// Load the Commands.
 	if (!sheets[config.commandsheet]) {
-		setIssue(`Error: Cannot find worksheet with title '${config.commandsheet}'.`)
+		reportError(`Error: Cannot find command worksheet with title '${config.commandsheet}'.`)
 		return
 	}
 	const commandRows = await sheets[config.commandsheet].getRows().catch(error => {
-		setIssue(`Error: Unable to load commands from the Google Sheets document.`)
+		reportError(`Error: Unable to load commands from the Google Sheets document.`)
 		throw error
 	})
+	commands = []
 	commandRows.forEach(row => {
 		if (row.command) {
 			commands[row.command] = row
@@ -90,14 +89,12 @@ async function loadDocument() {
 
 	// Set the Output sheet.
 	if (!sheets[config.outputsheet]) {
-		setIssue(`Error: Cannot find worksheet with title '${config.outputsheet}'.`)
+		reportError(`Error: Cannot find output worksheet with title '${config.outputsheet}'.`)
 		return
 	}
 	outputSheet = sheets[config.outputsheet]
 
-	// Cleanup.
-	clearIssue()
-	console.log(`Google Sheets document loaded successfully.`)
+	return true
 }
 
-module.exports = { loadDocument, getConfig, getCommands, getOutputSheet }
+module.exports = { authServiceWorker, loadGoogleSheet, getConfig, getCommands, getOutputSheet }
