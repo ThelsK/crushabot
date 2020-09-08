@@ -1,5 +1,5 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet')
-const { documentId, clientEmail, privateKey } = require("./environment")
+const { clientEmail, privateKey, documentId, botConfig } = require("./environment")
 const { setIssue, clearIssue } = require("./issue")
 
 const document = new GoogleSpreadsheet(documentId)
@@ -13,29 +13,50 @@ const getOutputSheet = () => outputSheet
 
 async function loadDocument() {
 	setIssue(`Initializing data. Please try again in a couple of seconds.`, "silent")
+	config = []
+	commands = []
+	outputsheet = null
 
-	// Load the Document.
-	try {
-		await document.useServiceAccountAuth({
-			client_email: clientEmail,
-			private_key: privateKey
-		})
-		await document.loadInfo()
-	}
-	catch {
-		setIssue(`Error: Unable to load Google Sheets document.`)
+	// Check the Environment variables.
+	if (!clientEmail) {
+		setIssue(`Error: ENV variable GOOGLE_CLIENT_EMAIL not set.`)
 		return
 	}
+	if (!privateKey) {
+		setIssue(`Error: ENV variable GOOGLE_PRIVATE_KEY not set.`)
+		return
+	}
+	if (!documentId) {
+		setIssue(`Error: ENV variable GOOGLE_DOCUMENT_ID not set.`)
+		return
+	}
+
+	// Authorize the Service Worker.
+	await document.useServiceAccountAuth({
+		client_email: clientEmail,
+		private_key: privateKey
+	}).catch(error => {
+		setIssue(`Error: Unable to authorize the Google service worker.`)
+		throw error
+	})
+
+	// Load the Document.
+	await document.loadInfo().catch(error => {
+		setIssue(`Error: Unable to load the Google Sheets document.`)
+		throw error
+	})
 	const sheets = document.sheetsByTitle
 	console.log("Google Sheets document:", document.title)
 
 	// Load the Configuration.
-	if (!sheets.botconfig) {
-		setIssue(`Error: Cannot find worksheet with title 'botconfig'.`)
+	if (!sheets[botConfig]) {
+		setIssue(`Error: Cannot find worksheet with title '${botConfig}'.`)
 		return
 	}
-	const configRows = await sheets.botconfig.getRows()
-	config = []
+	const configRows = await sheets.botconfig.getRows().catch(error => {
+		setIssue(`Error: Unable to load configuration from the Google Sheets document.`)
+		throw error
+	})
 	configRows.forEach(row => {
 		if (row.property) {
 			config[row.property] = row.value
@@ -57,8 +78,10 @@ async function loadDocument() {
 		setIssue(`Error: Cannot find worksheet with title '${config.commandsheet}'.`)
 		return
 	}
-	const commandRows = await sheets[config.commandsheet].getRows()
-	commands = []
+	const commandRows = await sheets[config.commandsheet].getRows().catch(error => {
+		setIssue(`Error: Unable to load commands from the Google Sheets document.`)
+		throw error
+	})
 	commandRows.forEach(row => {
 		if (row.command) {
 			commands[row.command] = row

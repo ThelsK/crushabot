@@ -1,4 +1,5 @@
 const Discord = require("discord.js")
+const { getConfig } = require("./googleSheet")
 const { discordToken } = require("./environment")
 
 function loadClient() {
@@ -14,4 +15,8 @@ function msgReply(msg, text) {
 	msg.reply(text)
 }
 
-module.exports = { loadClient, msgReply }
+function msgError(msg, text) {
+	msg.reply(text)
+}
+
+module.exports = { loadClient, msgReply, msgError }

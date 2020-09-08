@@ -1,7 +1,7 @@
-const { loadDocument, getConfig, getCommands, getOutputSheet } = require("./googleSheet")
-const { loadClient, msgReply } = require("./discordBot")
-const { getIssue } = require("./issue")
 const { getUTCDate, formatDate } = require("./date")
+const { loadClient, msgReply, msgError } = require("./discordBot")
+const { loadDocument, getConfig, getCommands, getOutputSheet } = require("./googleSheet")
+const { getIssue } = require("./issue")
 
 loadDocument()
 const client = loadClient()
@@ -36,7 +36,7 @@ client.on("message", async msg => {
 
 	// If there is an issue, report the issue instead of resolving the command.
 	if (getIssue()) {
-		msgReply(msg, getIssue())
+		msgError(msg, getIssue())
 		return
 	}
 
@@ -44,7 +44,7 @@ client.on("message", async msg => {
 	const config = getConfig()
 	if (msg.channel.guild.id !== config.serverid) {
 		if (command.startsWith("!")) {
-			msgReply(msg, `Error: Server ID mismatch. I am not supposed to be on this server.`)
+			msgError(msg, `Error: Server ID mismatch. I am not supposed to be on this server.`)
 		}
 		return
 	}
@@ -58,15 +58,15 @@ client.on("message", async msg => {
 	let com = getCommands()[command]
 	if (com && com.type === "alias") {
 		if (!com.reference) {
-			msgReply(msg, `Error: No reference set for alias command '${command}'.`)
+			msgError(msg, `Error: No reference set for alias command '${command}'.`)
 			return
 		}
 		if (!getCommands()[com.reference]) {
-			msgReply(msg, `Error: Alias command '${command}' refers to an unknown command '${com.reference}'.`)
+			msgError(msg, `Error: Alias command '${command}' refers to an unknown command '${com.reference}'.`)
 			return
 		}
 		if (getCommands()[com.reference].type === "alias") {
-			msgReply(msg, `Error: Alias command '${command}' refers to another alias command '${com.reference}'.`)
+			msgError(msg, `Error: Alias command '${command}' refers to another alias command '${com.reference}'.`)
 			return
 		}
 		command = com.reference
@@ -85,12 +85,12 @@ client.on("message", async msg => {
 
 	// Check if the command has a valid command type.
 	if (!com.type) {
-		msgReply(msg, `Error: No command type set for '${command}'.`)
+		msgError(msg, `Error: No command type set for '${command}'.`)
 		return
 	}
 	const types = ["info", "data", "flag", "text", "number", "date"]
 	if (!types.find(type => type === com.type)) {
-		msgReply(msg, `Error: Unknown command type '${com.type}' set for '${command}'.`)
+		msgError(msg, `Error: Unknown command type '${com.type}' set for '${command}'.`)
 		return
 	}
 
@@ -98,11 +98,11 @@ client.on("message", async msg => {
 	if (com.minrank) {
 		let minrank = msg.guild.roles.cache.find(role => role.name === com.minrank)
 		if (!minrank) {
-			msgReply(msg, `Error: Minimum rank '${com.minrank}' for command '${command}' not found.`)
+			msgError(msg, `Error: Minimum rank '${com.minrank}' for command '${command}' not found.`)
 			return
 		}
 		if (minrank.rawPosition > msg.member.roles.highest.rawPosition) {
-			msgReply(msg, `Only users with rank '${com.minrank}' or higher can use '${command}'.`)
+			msgReply(msg, `Only users with rank '${com.minrank}' or higher can use the '${command}' command.`)
 			return
 		}
 	}
@@ -122,7 +122,7 @@ client.on("message", async msg => {
 	await outputSheet.loadHeaderRow() // To make sure the admin user did not swap columns around.
 	const outputRows = await outputSheet.getRows()
 	if (!outputSheet.headerValues.find(value => value === config.discordtagcolumn)) {
-		msgReply(msg, `Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
+		msgError(msg, `Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
 		return
 	}
 
@@ -142,12 +142,12 @@ client.on("message", async msg => {
 
 		const outputType = outputRows.find(row => row[config.discordtagcolumn] === "type")
 		if (!outputType) {
-			msgReply(msg, `Error: Output row with Discord Tag 'type' not found.`)
+			msgError(msg, `Error: Output row with Discord Tag 'type' not found.`)
 			return
 		}
 		const outputDesc = outputRows.find(row => row[config.discordtagcolumn] === "description")
 		if (!outputDesc) {
-			msgReply(msg, `Error: Output row with Discord Tag 'description' not found.`)
+			msgError(msg, `Error: Output row with Discord Tag 'description' not found.`)
 			return
 		}
 
@@ -173,11 +173,11 @@ client.on("message", async msg => {
 
 	// Check if the reference column exists.
 	if (!com.reference) {
-		msgReply(msg, `Error: No reference column set for input command '${command}'.`)
+		msgError(msg, `Error: No reference column set for input command '${command}'.`)
 		return
 	}
 	if (!outputSheet.headerValues.find(value => value === com.reference)) {
-		msgReply(msg, `Error: Reference column header '${com.reference}' for input command '${command}' not found.`)
+		msgError(msg, `Error: Reference column header '${com.reference}' for input command '${command}' not found.`)
 		return
 	}
 
@@ -219,7 +219,7 @@ client.on("message", async msg => {
 		if (com.minimum) {
 			const minlength = Number(com.minimum)
 			if (isNaN(minlength)) {
-				msgReply(msg, `Error: Minimum length '${com.minimum}' for input command '${command}' is not a number.`)
+				msgError(msg, `Error: Minimum length '${com.minimum}' for input command '${command}' is not a number.`)
 				return
 			}
 			if (parameter.length < minlength) {
@@ -230,7 +230,7 @@ client.on("message", async msg => {
 		if (com.maximum) {
 			const maxlength = Number(com.maximum)
 			if (isNaN(maxlength)) {
-				msgReply(msg, `Error: Maximum length '${com.maximum}' for input command '${command}' is not a number.`)
+				msgError(msg, `Error: Maximum length '${com.maximum}' for input command '${command}' is not a number.`)
 				return
 			}
 			if (parameter.length > maxlength) {
@@ -254,7 +254,7 @@ client.on("message", async msg => {
 		if (com.minimum) {
 			const minvalue = Number(com.minimum)
 			if (isNaN(minvalue)) {
-				msgReply(msg, `Error: Minimum value '${com.minimum}' for input command '${command}' is not a number.`)
+				msgError(msg, `Error: Minimum value '${com.minimum}' for input command '${command}' is not a number.`)
 				return
 			}
 			if (parameter < minvalue) {
@@ -265,7 +265,7 @@ client.on("message", async msg => {
 		if (com.maximum) {
 			const maxvalue = Number(com.maximum)
 			if (isNaN(maxvalue)) {
-				msgReply(msg, `Error: Maximum value '${com.maximum}' for input command '${command}' is not a number.`)
+				msgError(msg, `Error: Maximum value '${com.maximum}' for input command '${command}' is not a number.`)
 				return
 			}
 			if (parameter > maxvalue) {
@@ -285,7 +285,7 @@ client.on("message", async msg => {
 		if (com.minimum) {
 			const mindate = getUTCDate(com.minimum)
 			if (isNaN(mindate)) {
-				msgReply(msg, `Error: Minimum value '${com.minimum}' for input command '${command}' is not a date.`)
+				msgError(msg, `Error: Minimum date '${com.minimum}' for input command '${command}' is not a date.`)
 				return
 			}
 			if (date.getTime() < mindate.getTime()) {
@@ -296,7 +296,7 @@ client.on("message", async msg => {
 		if (com.maximum) {
 			const maxdate = getUTCDate(com.maximum)
 			if (isNaN(maxdate)) {
-				msgReply(msg, `Error: Maximum value '${com.maximum}' for input command '${command}' is not a date.`)
+				msgError(msg, `Error: Maximum date '${com.maximum}' for input command '${command}' is not a date.`)
 				return
 			}
 			if (date.getTime() > maxdate.getTime()) {
@@ -309,7 +309,10 @@ client.on("message", async msg => {
 
 	// Create a new row if needed.
 	if (!outputRow) {
-		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) })
+		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) }).catch(error => {
+			setIssue(`Error: Unable to create new output row for the Google Sheets document.`)
+			throw error
+		})
 	}
 
 	// Update the row values.
@@ -329,7 +332,10 @@ client.on("message", async msg => {
 		outputRow[config.updatedvaluecolumn] = new Date(Date.now()).getTime()
 	}
 	outputRow[com.reference] = String(parameter)
-	await outputRow.save()
+	await outputRow.save().catch(error => {
+		setIssue(`Error: Unable to save output data to the Google Sheets document.`)
+		throw error
+	})
 
 	// Report back to the user.
 	if (parameter === true) {
