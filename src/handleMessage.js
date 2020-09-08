@@ -1,8 +1,8 @@
 const { loadGoogleSheet, getConfig, getCommands, getOutputSheet } = require("./googleSheet")
 const { getUTCDate, formatDate } = require("./date")
-const { config } = require("process")
+const { reportError } = require("./error")
 
-const lastReminder = {}
+const lastReminder = {} // To prevent spamming reminders.
 
 async function handleMessage(client, msg) {
 
@@ -405,11 +405,9 @@ async function msgError(msg, com, text) {
 		return
 	}
 	console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
-	console.log(`=> ${config.ownertag}: ${text}`)
-	await client.users.cache.get(config.ownertag).send(text).catch(error => {
-		reportError(`Error: Unable to send direct message to '${config.ownertag}'.`)
-		throw error
-	})
+	reportError(text)
+	const types = ["info", "data", "flag", "text", "number", "date"]
+	let deletemsg = false
 	if (!com || !types.find(type => com.type === type)) {
 		if (config.deletemsg === "TRUE") {
 			deletemsg = true

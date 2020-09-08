@@ -1,6 +1,7 @@
 const { checkEnvironments } = require("./environment")
 const { authServiceWorker, loadGoogleSheet } = require("./googleSheet")
 const { loginDiscordClient } = require("./discordBot")
+const { updateUsers } = require("./updateUsers")
 
 async function initialize() {
 
@@ -26,5 +27,9 @@ async function initialize() {
 	if (!success) {
 		return
 	}
+
+	// Update the Users every hour.
+	updateUsers()
+	setInterval(updateUsers, 3600000)
 }
 initialize()

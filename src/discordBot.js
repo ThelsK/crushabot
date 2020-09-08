@@ -4,6 +4,7 @@ const { handleMessage } = require("./handleMessage")
 const { reportError } = require("./error")
 
 const client = new Discord.Client()
+const getClient = () => client
 client.on("ready", () => console.log("Discord Bot connection:", client.user.tag))
 client.on("message", msg => handleMessage(client, msg))
 
@@ -16,4 +17,4 @@ async function loginDiscordClient() {
 	return true
 }
 
-module.exports = { loginDiscordClient }
+module.exports = { loginDiscordClient, getClient }
