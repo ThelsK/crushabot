@@ -1,18 +1,17 @@
 const { GoogleSpreadsheet } = require("google-spreadsheet")
 const { clientEmail, privateKey, documentId, botConfig } = require("./environment")
-const { reportError } = require("./error")
 
 const document = new GoogleSpreadsheet(documentId)
-let config = [] // Will store the configuration settings.
-let commands = [] // Will store the available commands.
-let outputSheet // Will store the output worksheet reference.
-let lastLoad = 0 // Will track when the Google Sheet document was last loaded.
+let config = [] // Contains loaded configuration settings.
+let commands = [] // Contains available commands.
+let outputSheet // Contains the output worksheet.
+let lastLoad = 0 // Timestamp for when the document was last fully loaded.
 
 const getConfig = () => config
 const getCommands = () => commands
 const getOutputSheet = () => outputSheet
 
-async function authServiceWorker() {
+async function authServiceWorker(reportError) {
 
 	// Authorize the Service Worker.
 	await document.useServiceAccountAuth({
@@ -26,7 +25,7 @@ async function authServiceWorker() {
 	return true
 }
 
-async function loadGoogleSheet() {
+async function loadGoogleSheet(reportError) {
 
 	// Only allow the document to be loaded once per ten minutes.
 	if (Date.now() < lastLoad + 600000) {

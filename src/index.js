@@ -1,35 +1,38 @@
 const { checkEnvironments } = require("./environment")
 const { authServiceWorker, loadGoogleSheet } = require("./googleSheet")
 const { loginDiscordClient } = require("./discordBot")
+const { reportError } = require("./error")
+const { handleMessage } = require("./handleMessage")
 const { updateUsers } = require("./updateUsers")
 
 async function initialize() {
 
 	// Check Environment variables.
-	if (!checkEnvironments()) {
-		return
+	if (!checkEnvironments(reportError)) {
+		process.exit()
 	}
 
 	// Authorize the Google service worker.
-	let success = await authServiceWorker()
+	let success = await authServiceWorker(reportError)
 	if (!success) {
-		return
+		process.exit()
 	}
 
 	// Load the Google Sheets document.
-	success = await loadGoogleSheet()
+	success = await loadGoogleSheet(reportError)
 	if (!success) {
-		return
+		process.exit()
 	}
 
 	// Initialize the Discord client.
-	success = await loginDiscordClient()
+	success = await loginDiscordClient(reportError, handleMessage)
 	if (!success) {
-		return
+		process.exit()
 	}
 
 	// Update the Users every hour.
 	updateUsers()
 	setInterval(updateUsers, 3600000)
+	console.log("Initialization completed.")
 }
 initialize()

@@ -32,13 +32,10 @@ async function updateUsers() {
 
 		// Check if it is an actual user row.
 		const discordTag = outputRow[config.discordtagcolumn]
-		console.log("Discord Tag:", discordTag, discordTag.indexOf("#"))
-		if (!discordTag || discordTag.indexOf("#") == -1) {
+		if (!discordTag || discordTag.indexOf("#") === -1) {
 			return
 		}
-		console.log("Guild Members:", guild.members.cache)
 		const member = await guild.members.cache.find(user => discordTag === `${user.user.username}#${user.user.discriminator}`)
-		console.log("Member:", member)
 		if (!member) {
 			if (config.discordrankcolumn) {
 				outputRow[config.discordrankcolumn] = "<not found>"

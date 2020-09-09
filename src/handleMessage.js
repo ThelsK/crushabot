@@ -1,10 +1,11 @@
 const { loadGoogleSheet, getConfig, getCommands, getOutputSheet } = require("./googleSheet")
+const { getClient } = require("./discordBot")
 const { getUTCDate, formatDate } = require("./date")
 const { reportError } = require("./error")
 
 const lastReminder = {} // To prevent spamming reminders.
 
-async function handleMessage(client, msg) {
+async function handleMessage(msg) {
 
 	// Ignore Bots.
 	if (msg.author.bot) {
@@ -16,6 +17,7 @@ async function handleMessage(client, msg) {
 	if (!success) {
 		return
 	}
+	const client = getClient()
 	const config = getConfig()
 	const commands = getCommands()
 
@@ -40,7 +42,7 @@ async function handleMessage(client, msg) {
 	// Check if the Bot is connected to the correct server.
 	const guild = client.guilds.cache.find(checkGuild => checkGuild.id === config.serverid)
 	if (!guild) {
-		msgError(msg, com, `Error: I am not connected to the Server with the configured Server ID.`)
+		msgError(msg, null, `Error: I am not connected to the Server with the configured Server ID.`)
 		return
 	}
 
@@ -366,7 +368,6 @@ async function msgReply(msg, com, text) {
 		}
 		if (config.replyindm === "TRUE") {
 			replyindm = true
-			console.log("Should be replying in PM 1")
 		}
 	} else {
 		if (com.deletemsg === "TRUE") {
@@ -374,17 +375,14 @@ async function msgReply(msg, com, text) {
 		}
 		if (com.replyindm === "TRUE") {
 			replyindm = true
-			console.log("Should be replying in PM 2")
 		}
 	}
 	if (replyindm) {
-		console.log("Replying in DM.")
 		await msg.author.send(text).catch(error => {
 			reportError(`Error: Unable to send a direct message to '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error
 		})
 	} else {
-		console.log("Replying as Reply.")
 		await msg.reply(text).catch(error => {
 			reportError(`Error: Unable to send a reply to '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error
