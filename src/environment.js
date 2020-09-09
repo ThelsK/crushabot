@@ -4,4 +4,17 @@ const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/gi, "\n") || proc
 const documentId = process.env.GOOGLE_DOCUMENT_ID || process.env.google_document_id
 const botConfig = process.env.GOOGLE_BOT_CONFIG || process.env.google_bot_config || "botconfig"
 
-module.exports = { discordToken, clientEmail, privateKey, documentId, botConfig }
+function checkEnvironments(reportError) {
+	const environments = ["DISCORD_TOKEN", "GOOGLE_CLIENT_EMAIL", "GOOGLE_PRIVATE_KEY", "GOOGLE_DOCUMENT_ID"]
+	for (let i in environments) {
+		const environment = environments[i]
+		if (!process.env[environment] && !process.env[environment.toLowerCase()]) {
+			reportError(`Error: Cannot find environment variable '${environment}'.`)
+			return
+		}
+	}
+
+	return true
+}
+
+module.exports = { discordToken, clientEmail, privateKey, documentId, botConfig, checkEnvironments }
