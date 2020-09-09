@@ -90,11 +90,11 @@ A function to format date and time. Used for formatting dates.
 ###### As such, all instructions are written with Linux in mind.
 ###### Windows and Mac users may need to substitute these with commands for their own OS.
 
-* Set the Discord Token.
+* Set the Discord Token:
 		* When you created the Discord App and Bot, you stored a token. You need that now.
 		* Note: If you have misplaced the token, you can return to the App settings and copy it again.
 		* Save the token to the "DISCORD_TOKEN" ENV parameter:
-> export DISCORD_TOKEN=copiedtokenvalue
+				``` export DISCORD_TOKEN=copiedtokenvalue ```
 
 
 
