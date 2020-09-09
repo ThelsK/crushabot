@@ -25,34 +25,34 @@ A function to format date and time. Used for formatting dates.
 ### Create the Discord App and Bot, and invite it to the Server.
 
 * Go to https://discord.com/developers
-  * Click on "New Application". Provide a name for your Application, and click Create.
+  	* Click on "New Application". Provide a name for your Application, and click Create.
 
 * Go to the Bot page. Click on "Add Bot", and click "Yes, do it!".
-  * Optionally click on the icon to provide your own image for the Bot.
-  * Set "Public Bot" to off, then click on Save Changes at the bottom of the page.
-  * Copy the Token and store it. Later on, you need to specify this token as the ENV parameter "DISCORD_TOKEN".
+  	* Optionally click on the icon to provide your own image for the Bot.
+  	* Set "Public Bot" to off, then click on Save Changes at the bottom of the page.
+  	* Copy the Token and store it. Later on, you need to specify this token as the ENV parameter "DISCORD_TOKEN".
 
 * Go to the OAuth2 page. For Scopes, enable "bot".
-  * For Bot Permissions, enable "View Channels" and "Send Messages".
-  * If you want the Bot to be able to delete messages, also enable "Manage Messages".
-  * Copy the link at the bottom of the Scopes section.
+  	* For Bot Permissions, enable "View Channels" and "Send Messages".
+  	* If you want the Bot to be able to delete messages, also enable "Manage Messages".
+  	* Copy the link at the bottom of the Scopes section.
 
 * Note: Opening the link invites the Bot to your Discord Server. You do not need to do this right away.
-  * If you are the owner of the Discord Server, open the link in your browser, and confirm the Bot permissions.
-  * If someone else is the owner of the Discord Server, send the link to the owner. They must open it and confirm the Bot permissions.
+  	* If you are the owner of the Discord Server, open the link in your browser, and confirm the Bot permissions.
+  	* If someone else is the owner of the Discord Server, send the link to the owner. They must open it and confirm the Bot permissions.
 
 ### Create the Google Service Worker.
 
 * Go to https://console.developers.google.com/cloud-resource-manager
-  * Click on "Create Project". Provide a name for your Project, and click Create.
-  * Click the three dots right of your Project, and click "Settings". Note: You may need to expand "No organization".
+	* Click on "Create Project". Provide a name for your Project, and click Create.
+	* Click the three dots right of your Project, and click "Settings". Note: You may need to expand "No organization".
 
 * Make sure the correct Project is opened, and go to the Service Accounts page.
-  * Click on "Create Service Account". Provide a Service account name, and click "Create".
-  * For Service account permissions, leave the role blank, and click "Continue".
-  * For Grant users access to this service account (optional), leave the rules blank, and click "Done".
+	* Click on "Create Service Account". Provide a Service account name, and click "Create".
+	* For Service account permissions, leave the role blank, and click "Continue".
+	* For Grant users access to this service account (optional), leave the rules blank, and click "Done".
 
 * Open the Service account by clicking on the Email link.
-  * Click on "Add Key", "Create new key". Select "JSON", then click "Create".
-  * This should cause the download of a .json file. Store it. You will need it later on, and you are unable to download it again.
+	* Click on "Add Key", "Create new key". Select "JSON", then click "Create".
+	* This should cause the download of a .json file. Store it. You will need it later on, and you are unable to download it again.
 
