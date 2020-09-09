@@ -72,9 +72,12 @@ A function to format date and time. Used for formatting dates.
 	* Click on "Untitled spreadsheet" to provide a name for your spreadsheet.
 
 * Method 2: Create a copy of the template document:
-	* Go to https://docs.google.com/spreadsheets/d/1Z40cLwARx0Q4ytED6ILbe7p7Ppzlr0q3Se4xCc8xRME
+	* Go to https://docs.google.com/spreadsheets/d/1X60przJGEr8byNhf-mRPQz1inTMp21pQYnovdOXGwVQ
 	* Click on File, Make a copy.
 	* Provide a name for your spreadsheet, and click "OK".
+
+* Configure the Settings:
+	* See Configuration further down this readme for details on how to properly configure your document.
 
 * Allow the Google Service Worker to access the document:
 	* When you created the Google Service Worker, you downloaded a .json file. Open that file now.
@@ -83,12 +86,8 @@ A function to format date and time. Used for formatting dates.
 	* In the Google Spreadsheet, click on "Share". Click on "Add people and groups" and paste the email.
 	* Set the rights to "Editor", and disable "Notify people". Click on "Share".
 
-* Configure the Settings:
-	* See Configuration further down this readme for details on how to properly configure your document.
-
 ### Set ENV parameters and install the Bot.
-
-###### Note: This application is created and tested running Ubuntu-20.04 on WSL2. As such, all instructions are written with Linux in mind. Windows and Mac users may need to substitute certain commands with commands that are applicable to their own OS. It is also assumed that Node.js and NPM are already installed.
+###### Note: This application is created and tested for Ubuntu-20.04 on WSL2. As such, all instructions are written with Linux in mind. Windows and Mac users may need to substitute certain commands with commands that are applicable to their own OS. It is also assumed that Node.js and NPM are already installed.
 
 * Set the Discord Token ENV parameter:
 	* When you created the Discord App and Bot, you stored a token. You need that now.
@@ -121,9 +120,112 @@ A function to format date and time. Used for formatting dates.
 		* ```git clone git@github.com:ThelsK/crushabot.git```
 	* Enter the directory to which the code is downloaded:
 		* ```cd crushabot```
-	* Install dependencies:
+	* Install the dependencies:
 		* ```npm i```
 	* Run the bot:
 		* ```node .```
 
 ## Configuration
+
+The Bot makes use of three different Worksheet tabs:
+* One tab is used for general configuration settings.
+* One tab is used to define the commands available to users.
+* One tab is used to output the values that users enter using the input commands.
+
+If the instructions are unclear, please check the [https://docs.google.com/spreadsheets/d/1X60przJGEr8byNhf-mRPQz1inTMp21pQYnovdOXGwVQ](Crusha Bot Template) for an example.
+
+### General Configuration
+
+On default, the Bot checks for a Worksheet named "botconfig" to find the general configuration. If you want to give this Worksheet a different name, you need to store that name in an ENV parameter, as described in the installation procedure.
+
+The general configuration sheet must have a cell on the first row with the text "property" and another cell on the first row with the text "value". The property column contains the key of the configuration settings, while the value column contains the value that should be assigned to that key.
+
+The configuration settings "serverid", "commandsheet", "outputsheet" and "discordtagcolumn" are mandatory. They must be present with a correct value. The other configuration settings are optional. They can be missing from the property column, or have a blank cell for their value.
+
+* serverid (Mandatory)
+	* This is the Server ID for your Discord Server. To find your Server ID, rightclick your Discord Server, and open Serverconfiguration > Widget. 
+* inputchannel (Optional)
+	* If set, the Bot will only listen to channel messages in that channel, and ignore all other channels. If left blank, the Bot will listen to channel messages in any channel. This does not affect direct messages. Do not include the # character.
+* ownertag (Optional)
+	* If set, when the Bot runs into a configuration error, it will try to report the error to you as a direct message. If left blank, the error is either replied to a user entering a command, or not reported at all. Note that input errors from users are always replied to the user. Errors are always logged to the console log.
+* replyindm (Optional)
+	* If set to "TRUE", when a user performs an invalid command, the Bot will reply to the user as a direct message. If left blank, the Bot will reply to channel messages as a channel message, and to direct messages as a direct message. For valid commands, this can be set per command.
+* deletemsg (Optional)
+	* If set to "TRUE", when a user performs a command as a channel message, the Bot will delete the user's message. If left blank, the Bot will not delete any messages. Direct messages will never be deleted. For valid commands, this can be set per command.
+* commandsheet (Mandatory)
+	* This is the name of the Worksheet that contains the commands available to users.
+* outputsheet (Mandatory)
+	* This is the name of the Worksheet to which the Bot will output the values that users enter using the input commands.
+* discordtagcolumn (Mandatory)
+	* This is the name of the column on the output Worksheet that contains the Discord Tags of the users that put in data.
+* discordnamecolumn (Optional)
+	* This is the name of the column on the output Worksheet that contains the Discord name that the user uses on your specific Discord Server. This value is automatically updated every hour. If left blank, this data is not stored. This is included to make it easier to recognize users.
+* discordrankcolumn (Optional)
+	* This is the name of the column on the output Worksheet that contains the name of the highest Discord Role that the user belongs to on your specific Discord Server. This value is automatically updated every hour. If left blank, this data is not stored. This is included so you can apply different weights to different roles.
+* rankvaluecolumn (Optional)
+	* This is the name of the column on the output Worksheet that contains the value of the highest Discord Role that the user belongs to on your specific Discord Server. This value is automatically updated every hour. If left blank, this data is not stored. Users without roles have a value of 0. Users with only the lowest role have a value of 1, and from there it counts up. Note that adding or deleting a role or bot updates these values. It is therefor recommended to base any weights on the name of the Discord Role, and not the value. The value is only included to make it easier to sort the users.
+* lastupdatedcolumn (Optional)
+	* This is the name of the column on the output Worksheet that contains the moment that the user last updated their values in descriptive UTC date and time. If left blank, this data is not stored.
+* updatedvaluecolumn (Optional)
+	* This is the name of the column on the output Worksheet that contains the moment that the user last updated their values in milliseconds since January 1st 1970 Midnight UTC. If left blank, this data is not stored. This value is included to make it easier to sort the users. When displayed as part of a data command, if the type on the Output Worksheet is set to date, it will be displayed as a properly readable date.
+* textenabled (Optional)
+	* When flags are displayed as part of a data command, flags that are set to true will list this as their value. In addition, this is an acceptable parameter for a data command (case insensitive). if left blank, flags that are set to true will list "On" as their value.
+* textdisabled (Optional)
+	* When flags are displayed as part of a data command, flags that are set to false will list this as their value. In addition, this is an acceptable parameter for a data command (case insensitive). if left blank, flags that are set to false will list "Off" as their value.
+* dateformat (Optional)
+	* This is the mask used to display dates. If left blank, "dddd dd mmmm yyyy, HH:MM:ss" is used as the mask. See https://github.com/felixge/node-dateformat for available mask options. Do not include "UTC:" in the mask.
+
+### Available User Commands
+
+The name of the Worksheet that contains the available user commands is specified in the general configuration.
+
+The available user commands sheet must have cells on the first row with the texts "command", "inchannel", "indm", "replyindm", "deletemsg", "type", "minimum", "maximum", "forbidden", "minrank", "reference" and "reply".
+
+Each command must be placed on its own row, with the applicable values in the column with the matching header text. Most values are optional and can be left blank.
+
+* command
+	* This is a command that users may perform. All other values on the same row apply to this command. The command must be entered in lowercase on the Worksheet. The command is case insensitive when entered in Discord.
+* inchannel
+	* If set to "TRUE", this command can be used in channel messages on your Discord Server. If left blank, this command cannot be used in channel messages. Note that if you set an inputchannel, commands are restricted to that inputchannel.
+* indm
+	* If set to "TRUE", this command can be used in direct messages to the Bot. If left blank, this command cannot be used in direct messages. Note that both inchannel and indm can be set to "TRUE".
+* replyindm
+	* If set to "TRUE", and this command is used in a channel message on your Discord Server, the Bot will reply as a direct message. If left blank, the Bot will reply as a channel message. This does not affect commands that are used in a direct message.
+* deletemsg
+	* If set to "TRUE", and this command is used in a channel message on your Discord Server, the Bot will delete the channel message. If left blank, the Bot will not delete the channel message. This does not affect commands that are used in a direct message.
+* type
+	* This is the type of command. The type must be entered in lowercase, and is mandatory for all commands. The following command types are available:
+		* "info": This command only provides static information (included in the reply).
+		* "data": This command reports the data that is currently stored for the user entering the command.
+		* "flag": This command allows the user to input an on or off value, which will be stored on the Output Worksheet.
+		* "text": This command allows the user to input a text value, which will be stored on the Output Worksheet.
+		* "number": This command allows the user to input a number value, which will be stored on the Output Worksheet.
+		* "date": This command allows the user to input a date and time value.
+		* "alias": This command is an alias for another command. Note that an alias can never refer to another alias. Also, the Bot ignores most settings for alias commands, instead using the settings for the command that it refers to.
+* minimum
+	* For text commands, this specifies the minimum length of the text. If left blank, there is no minimum length.
+	* For number commands, this specifies the minimum value of the number. If left blank, there is no minimum value.
+	* For date commands, this specifies the earliest possible date that can be provided. If left blank, there is no earliest possible date.
+* maximum
+	* For text commands, this specifies the maximum length of the text. If left blank, there is no maximum length.
+	* For number commands, this specifies the maximum value of the number. If left blank, there is no maximum value.
+	* For date commands, this specifies the latest possible date that can be provided. If left blank, there is no latest possible date.
+* forbidden
+	* For text commands, these characters cannot be included in the text. The characters do not need to be separated. If left blank, there are no forbidden characters.
+	* For number commands, if set to "TRUE", the value must be a round number. If left blank, the value may include decimals.
+* minrank
+	* If set, only users with this role or a higher role may perform this command. If left blank, any user may perform this command.
+* reference
+	* For data, flag, text and number commands, this is the name of the column on the output Worksheet to which this data will be stored.
+	* For alias command, this is the command that the alias refers to. Remember that it cannot refer to another alias.
+* reply
+	* When the Bot replies to the command, it will start the reply with this text.
+
+### Available User Commands
+
+The name of the Worksheet that contains the available user commands is specified in the general configuration.
+
+The available user commands sheet must have cells on the first row with the texts "command", "inchannel", "indm", "replyindm", "deletemsg", "type", "minimum", "maximum", "forbidden", "minrank", "reference" and "reply".
+
+Each command must be placed on its own row, with the applicable values in the column with the matching header text. Most values are optional and can be left blank.
+
