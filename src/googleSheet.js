@@ -49,7 +49,7 @@ async function loadGoogleSheet(reportError) {
 		reportError(`Error: Cannot find configuration worksheet with title '${botConfig}'.`)
 		return
 	}
-	const configRows = await sheets.botconfig.getRows().catch(error => {
+	const configRows = await sheets[botConfig].getRows().catch(error => {
 		reportError(`Error: Unable to load configuration from the Google Sheets document.`)
 		throw error
 	})

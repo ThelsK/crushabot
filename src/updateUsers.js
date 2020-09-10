@@ -55,7 +55,7 @@ async function updateUsers() {
 			}
 		}
 		await outputRow.save().catch(error => {
-			setIssue(`Error: Unable to save output data to the Google Sheets document.`)
+			reportError(`Error: Unable to save output data to the Google Sheets document.`)
 			throw error
 		})
 	})
