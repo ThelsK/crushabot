@@ -1,6 +1,6 @@
 {
   "name": "crushabot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Discord Bot that saves data to Google Sheets",
   "main": "src",
   "scripts": {
