@@ -19,7 +19,7 @@ You need an environment to run the Bot in. The Bot has been developed in Ubuntu-
 	* A Google account
 	* A Discord account
 
-Finally, you must have a Discord server to run the Bot on. You do not need to be the owner of the server. However, you will need the owner's assistance to get the Bot to connect to the server.
+* Finally, you must have a Discord server to run the Bot on. You do not need to be the owner of the server. However, you will need the owner's assistance to get the Bot to connect to the server.
 
 ## Dependencies
 
