@@ -72,9 +72,17 @@ async function handleMessage(msg) {
 
 	// Check if the command exists.
 	if (!com) {
-		if (command.startsWith("!") && commands["!help"]) {
+		if (!command.startsWith("!")) {
+			return
+		}
+		if (msg.guild && config.nocommandinchannel !== "TRUE") {
+			return
+		} else if (!msg.guild && config.nocommandindm !== "TRUE") {
+			return
+		}
+		if (commands["!help"]) {
 			msgReply(msg, com, `Unknown command '${command}'. Type '!help' for an overview of available commands.`)
-		} else if (command.startsWith("!")) {
+		} else {
 			msgReply(msg, com, `Unknown command '${command}'.`)
 		}
 		return
@@ -93,13 +101,17 @@ async function handleMessage(msg) {
 
 	// Check if the command is allowed as a channel message.
 	if (msg.guild && com.inchannel !== "TRUE") {
-		msgReply(msg, com, `Command '${command} is not allowed as a channel message. Try it as a direct message.`)
+		if (config.nocommandinchannel === "TRUE") {
+			msgReply(msg, com, `Command '${command} is not allowed as a channel message. Try it as a direct message.`)
+		}
 		return
 	}
 
 	// Check if the command is allowed as a direct message.
 	if (!msg.guild && com.indm !== "TRUE") {
-		msgReply(msg, com, `Command '${command} is not allowed as a direct message. Try it as a channel message.`)
+		if (config.nocommandindm === "TRUE") {
+			msgReply(msg, com, `Command '${command} is not allowed as a direct message. Try it as a channel message.`)
+		}
 		return
 	}
 
