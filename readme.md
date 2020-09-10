@@ -47,7 +47,7 @@ A function to format date and time. Used for formatting dates.
 	* Go to the Bot page. Click on "Add Bot", and click "Yes, do it!".
 	* Optionally click on the icon to provide your own image for the Bot.
 	* Set "Public Bot" to off, then click on Save Changes at the bottom of the page.
-	* Copy the Token and store it. Later on, you need to specify this token as the ENV parameter "DISCORD_TOKEN".
+	* Copy the Token and store it. Later on, you need to specify this token as the ENV parameter "CRUSHABOT_DISCORD_TOKEN".
 
 * Create an invitation link:
 	* Go to the OAuth2 page. For Scopes, enable "bot".
@@ -112,28 +112,28 @@ You can either create a new sheet from scratch and fill in everything yourself, 
 * Set the Discord Token ENV parameter:
 	* When you created the Discord App and Bot, you stored a token. You need that now.
 	* Note: If you have misplaced the token, you can return to the App settings and copy it again.
-	* Save the token to the "DISCORD_TOKEN" ENV parameter:
-		* ```export DISCORD_TOKEN=copiedtokenvalue```
+	* Save the token to the "CRUSHABOT_DISCORD_TOKEN" ENV parameter:
+		* ```export CRUSHABOT_DISCORD_TOKEN=copiedtokenvalue```
 
 * Set the Google Service Worker credentials ENV parameters:
 	* When you created the Google Service Worker, you downloaded a .json file. Open that file now.
 	* Note: If you have misplaced the file, you need to generate a new key for your Service Worker.
 	* Copy the email listed after "client_email", up to and including the quotes.
-	* Save the email to the "GOOGLE_CLIENT_EMAIL" ENV parameter:
-		* ```export GOOGLE_CLIENT_EMAIL=copiedclientemail```
+	* Save the email to the "CRUSHABOT_GOOGLE_CLIENT_EMAIL" ENV parameter:
+		* ```export CRUSHABOT_GOOGLE_CLIENT_EMAIL=copiedclientemail```
 	* Copy the key listed after "private_key", up to and including the quotes.
-	* Save the key to the "GOOGLE_PRIVATE_KEY" ENV parameter:
-		* ```export GOOGLE_PRIVATE_KEY=copiedprivatekey```
+	* Save the key to the "CRUSHABOT_GOOGLE_PRIVATE_KEY" ENV parameter:
+		* ```export CRUSHABOT_GOOGLE_PRIVATE_KEY=copiedprivatekey```
 
 * Set the Google Spreadsheet document ID ENV parameter:
 	* Copy the Document ID from the URL of your Google Spreadsheet document (in between "/d/" and "/edit").
-	* Save the id to the "GOOGLE_DOCUMENT_ID" ENV parameter:
-		* ```export GOOGLE_DOCUMENT_ID=copieddocumentid```
+	* Save the id to the "CRUSHABOT_GOOGLE_DOCUMENT_ID" ENV parameter:
+		* ```export CRUSHABOT_GOOGLE_DOCUMENT_ID=copieddocumentid```
 
 * Optionally set the Bot Configuration worksheet name:
 	* On default, the Bot assumes that the Configuration is stored on the Worksheet called "botconfig".
-	* If you want to use a different name for the Worksheet, save the name to the "GOOGLE_BOT_CONFIG" ENV parameter:
-		* ```export GOOGLE_BOT_CONFIG=worksheetname```
+	* If you want to use a different name for the Worksheet, save the name to the "CRUSHABOT_GOOGLE_BOT_CONFIG" ENV parameter:
+		* ```export CRUSHABOT_GOOGLE_BOT_CONFIG=worksheetname```
 
 * Install the Bot:
 	* Download the code to your computer:
@@ -257,5 +257,7 @@ Two rows hold settings that are used for displaying the values when a user perfo
 
 ## _Versions_
 
+* 1.0.1
+	* Add a "CRUSHABOT_" prefix to all the ENV parameters. The old ENV parameters are still supported as a fallback, if the new ENV parameters are not found.
 * 1.0.0
 	* Initial release.
