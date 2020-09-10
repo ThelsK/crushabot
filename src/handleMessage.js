@@ -319,7 +319,7 @@ async function handleMessage(msg) {
 	// Create a new row if needed.
 	if (!outputRow) {
 		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) }).catch(error => {
-			setIssue(`Error: Unable to create new output row for the Google Sheets document.`)
+			reportIssue(`Error: Unable to create new output row for the Google Sheets document.`)
 			throw error
 		})
 	}
@@ -342,7 +342,7 @@ async function handleMessage(msg) {
 	}
 	outputRow[com.reference] = String(parameter)
 	await outputRow.save().catch(error => {
-		setIssue(`Error: Unable to save output data to the Google Sheets document.`)
+		reportIssue(`Error: Unable to save output data to the Google Sheets document.`)
 		throw error
 	})
 
