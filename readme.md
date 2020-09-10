@@ -79,6 +79,10 @@ A function to format date and time. Used for formatting dates.
 	* This should cause the download of a .json file. Store it. You will need it later on.
 	* Note: You are unable to download these credentials later on. If you misplace the file, you need to create a new key.
 
+* Enable the Google Sheets API:
+	* Click on "Google APIs" in the top left corner of the page.
+	* Click on "Enable APIs and Services", click on "Google Sheets API", and click on Enable.
+
 ### Create the Google Worksheet document.
 
 You can either create a new sheet from scratch and fill in everything yourself, or create a copy of the template document and adjust it to your needs.
