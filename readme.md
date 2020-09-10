@@ -6,7 +6,7 @@ The Bot uses ENV parameters to connect to Discord and the Google Sheet. All othe
 
 Note, to support direct messages, the Bot can only support a single Discord Server. If the Bot would support multiple Discord Servers, it would have no way of telling for which Discord Server the direct messages are intended. To support another Discord Server, you must run a separate bot with separate ENV parameters.
 
-## Requirements
+## _Requirements_
 
 You need an environment to run the Bot in. The Bot has been developed in Ubuntu-20.04 running on WSL2. The installation instructions assume you have access to a Linux terminal. It should be possible to run the bot on Windows or Mac, but you will need to figure out yourself how to download and run the source code.
 
@@ -21,7 +21,7 @@ You need an environment to run the Bot in. The Bot has been developed in Ubuntu-
 
 * Finally, you must have a Discord server to run the Bot on. You do not need to be the owner of the server. However, you will need the owner's assistance to get the Bot to connect to the server.
 
-## Dependencies
+## _Dependencies_
 
 ### [Discord.js](https://discord.js.org)
 
@@ -35,7 +35,7 @@ A third party Google Sheets API wrapper for Node.js. Used for reading from and w
 
 A function to format date and time. Used for formatting dates.
 
-## Installation
+## _Installation_
 
 ### Create the Discord App and Bot, and invite it to the Server.
 
@@ -145,7 +145,7 @@ You can either create a new sheet from scratch and fill in everything yourself, 
 	* Run the bot:
 		* ```node .```
 
-## Configuration
+## _Configuration_
 
 The Bot makes use of three different Worksheet tabs:
 * One tab is used for general configuration settings.
@@ -241,11 +241,21 @@ Each command must be placed on its own row, with the applicable values in the co
 * reply
 	* When the Bot replies to the command, it will start the reply with this text.
 
-### Available User Commands
+### Value Output
 
-The name of the Worksheet that contains the available user commands is specified in the general configuration.
+The name of the Worksheet that contains the output is specified in the general configuration.
 
-The available user commands sheet must have cells on the first row with the texts "command", "inchannel", "indm", "replyindm", "deletemsg", "type", "minimum", "maximum", "forbidden", "minrank", "reference" and "reply".
+The value output sheet must have cells on the first row with the texts matching the values of the "discordtagcolumn", "discordnamecolumn", "discordrankcolumn", "rankvaluecolumn", "lastupdatedcolumn" and "updatedvaluecolumn" configuration settings, except for those that are blank or missing. There must also be cells on the first row with the texts matching the references of the flag, text, number and date commands.
 
-Each command must be placed on its own row, with the applicable values in the column with the matching header text. Most values are optional and can be left blank.
+Each user will be assigned its own row, with their Discord Tag stored in the column with the "discordtagcolumn" value. This column is the leading column. All other values on the same row are linked to that Discord Tag. Users are automatically added when they first specify any value (using a flag, text, number or date command).
 
+Every hour, the Bot checks all users on the sheet, and updates their Rank, Rank Value and Nickname. If the user is no longer found on the Server, the Rank is set to "<not found>" and the Rank Value is set to -1. The Bot never automatically deletes users from the Worksheet.
+
+Keep in mind that if you specify a minimum rank for certain commands, these values remain, even if the user is demoted and no longer has sufficient rank, or if the user is removed from the server. If you want to exclude these values, either manually delete them, or use a filter or weight system based on the user rank.
+
+Two rows hold settings that are used for displaying the values when a user performs a data command to see their stored values. These rows must have the texts "type" and "description" in the column with the "discordtagcolumn" value. The "type" row determines in what format the value in that column is displayed (flag, text, number or date). If left blank, the value in that column is not displayed. The "description" row holds the label for the value, so the user can see which value is what. Note that these rows do not need to be near the top of the Worksheet.
+
+## _Versions_
+
+* 1.0.0
+	* Initial release.
