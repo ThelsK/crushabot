@@ -168,6 +168,10 @@ The configuration settings "serverid", "commandsheet", "outputsheet" and "discor
 	* If set, the Bot will only listen to channel messages in that channel, and ignore all other channels. If left blank, the Bot will listen to channel messages in any channel. This does not affect direct messages. Do not include the # character.
 * ownertag (Optional)
 	* If set, when the Bot runs into a configuration error, it will try to report the error to you as a direct message. If left blank, the error is either replied to a user entering a command, or not reported at all. Note that input errors from users are always replied to the user. Errors are always logged to the console log.
+* nocommandinchannel (Optional)
+	* If set to "TRUE", when a user performs an invalid command as a channel message, or performs a direct message only command as a channel message, the Bot will reply to the user that the command is invalid or cannot be used as a channel message. If left blank, the Bot will not reply anything.
+* nocommandindm (Optional)
+	* If set to "TRUE", when a user performs an invalid command as a direct message, or performs a channel message only command as a direct message, the Bot will reply to the user that the command is invalid or cannot be used as a direct message. If left blank, the Bot will not reply anything.
 * replyindm (Optional)
 	* If set to "TRUE", when a user performs an invalid command, the Bot will reply to the user as a direct message. If left blank, the Bot will reply to channel messages as a channel message, and to direct messages as a direct message. For valid commands, this can be set per command.
 * deletemsg (Optional)
@@ -257,6 +261,8 @@ Two rows hold settings that are used for displaying the values when a user perfo
 
 ## _Versions_
 
+* 1.0.2
+	* Add an option to prevent the Bot from replying to invalid commands, or commands entered in the incorrect way (channel vs dm). See the "nocommandinchannel" and "nocommandindm" configuration settings for details.
 * 1.0.1
 	* Add a "CRUSHABOT_" prefix to all the ENV parameters. The old ENV parameters are still supported as a fallback, if the new ENV parameters are not found.
 * 1.0.0
