@@ -81,12 +81,14 @@ A function to format date and time. Used for formatting dates.
 
 ### Create the Google Worksheet document.
 
+You can either create a new sheet from scratch and fill in everything yourself, or create a copy of the template document and adjust it to your needs.
+
 * Method 1: Create a new blank document:
 	* Go to https://docs.google.com/spreadsheets
 	* Click on Blank to create a new document.
 	* Click on "Untitled spreadsheet" to provide a name for your spreadsheet.
 
-* Method 2: Create a copy of the template document:
+* Method 2: Create a copy of the template document (recommended):
 	* Go to https://docs.google.com/spreadsheets/d/1X60przJGEr8byNhf-mRPQz1inTMp21pQYnovdOXGwVQ
 	* Click on File, Make a copy.
 	* Provide a name for your spreadsheet, and click "OK".
@@ -200,7 +202,7 @@ Each command must be placed on its own row, with the applicable values in the co
 * command
 	* This is a command that users may perform. All other values on the same row apply to this command. The command must be entered in lowercase on the Worksheet. The command is case insensitive when entered in Discord.
 * inchannel
-	* If set to "TRUE", this command can be used in channel messages on your Discord Server. If left blank, this command cannot be used in channel messages. Note that if you set an inputchannel, commands are restricted to that inputchannel.
+	* If set to "TRUE", this command can be used in channel messages on your Discord Server. If left blank, this command cannot be used in channel messages. Note that if you set an inputchannel in the general configuration, commands are restricted to that inputchannel.
 * indm
 	* If set to "TRUE", this command can be used in direct messages to the Bot. If left blank, this command cannot be used in direct messages. Note that both inchannel and indm can be set to "TRUE".
 * replyindm
