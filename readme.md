@@ -232,7 +232,7 @@ Each command must be placed on its own row, with the applicable values in the co
 * minrank
 	* If set, only users with this role or a higher role may perform this command. If left blank, any user may perform this command.
 * reference
-	* For data, flag, text and number commands, this is the name of the column on the output Worksheet to which this data will be stored.
+	* For  flag, text, number and date commands, this is the name of the column on the output Worksheet to which this data will be stored.
 	* For alias command, this is the command that the alias refers to. Remember that it cannot refer to another alias.
 * reply
 	* When the Bot replies to the command, it will start the reply with this text.
