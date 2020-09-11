@@ -52,7 +52,7 @@ async function handleMessage(msg) {
 	let parameter = content.substr(content.indexOf(" ") + 1).trim()
 
 	// Check if the command is an alias command.
-	let com = commands[command]
+	let com = commands.find(commandEntry => commandEntry.command === command)
 	if (com && com.type === "alias") {
 		if (!com.reference) {
 			msgError(msg, com, `Error: No reference set for alias command '${command}'.`)
