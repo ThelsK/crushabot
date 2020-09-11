@@ -84,8 +84,7 @@ async function loadGoogleSheet(reportError) {
 		if (row.command) {
 			commands.push(row)
 		}
-	})
-	console.log("Commands:", commands)
+	}
 
 	// Set the Output sheet.
 	if (!sheets[config.outputsheet]) {
