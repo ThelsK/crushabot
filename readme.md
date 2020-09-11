@@ -261,6 +261,9 @@ Two rows hold settings that are used for displaying the values when a user perfo
 
 ## _Versions_
 
+* 1.0.3
+	* Fix: Arrayformulas are no longer accepted as valid commands.
+	* Fix: Commands no longer overwrite arrayformulas.
 * 1.0.2
 	* Add an option to prevent the Bot from replying to invalid commands, or commands entered in the incorrect way (channel vs dm). See the "nocommandinchannel" and "nocommandindm" configuration settings for details.
 * 1.0.1

@@ -52,22 +52,23 @@ async function handleMessage(msg) {
 	let parameter = content.substr(content.indexOf(" ") + 1).trim()
 
 	// Check if the command is an alias command.
-	let com = commands[command]
+	let com = commands.find(commandEntry => commandEntry.command === command)
 	if (com && com.type === "alias") {
 		if (!com.reference) {
 			msgError(msg, com, `Error: No reference set for alias command '${command}'.`)
 			return
 		}
-		if (!commands[com.reference]) {
+		const reference = commands.find(commandEntry => commandEntry.command === com.reference)
+		if (!reference) {
 			msgError(msg, com, `Error: Alias command '${command}' refers to an unknown command '${com.reference}'.`)
 			return
 		}
-		if (commands[com.reference].type === "alias") {
+		if (reference.type === "alias") {
 			msgError(msg, com, `Error: Alias command '${command}' refers to another alias command '${com.reference}'.`)
 			return
 		}
 		command = com.reference
-		com = commands[command]
+		com = reference
 	}
 
 	// Check if the command exists.

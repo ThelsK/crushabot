@@ -82,7 +82,7 @@ async function loadGoogleSheet(reportError) {
 	commands = []
 	commandRows.forEach(row => {
 		if (row.command) {
-			commands[row.command] = row
+			commands.push(row)
 		}
 	})
 
