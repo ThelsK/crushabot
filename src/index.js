@@ -33,6 +33,7 @@ async function initialize() {
 	// Update the Users every hour.
 	updateUsers()
 	setInterval(updateUsers, 3600000)
+	setInterval(authServiceWorker, 86400000)
 	console.log("Initialization completed.")
 }
 initialize()
