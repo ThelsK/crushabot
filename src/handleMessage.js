@@ -111,7 +111,6 @@ async function handleMessage(msg) {
 	// Find the user's highest matching rank.
 	const member = await guild.members.fetch(msg.author)
 	const rankData = findRank(member)
-	console.log("Rank Data:", rankData)
 
 	// Check if the user is of adequate rank.
 	if (com.minrank) {
@@ -181,16 +180,6 @@ async function handleMessage(msg) {
 			}
 		})
 		msgReply(msg, com, reply)
-		return
-	}
-
-	// Check if the reference column exists.
-	if (!com.reference) {
-		msgError(msg, com, `Error: No reference column set for input command '${command}'.`)
-		return
-	}
-	if (!outputSheet.headerValues.find(value => value === com.reference)) {
-		msgError(msg, com, `Error: Reference column header '${com.reference}' for input command '${command}' not found.`)
 		return
 	}
 
@@ -320,6 +309,16 @@ async function handleMessage(msg) {
 		parameter = formatDate(date)
 	}
 
+	// Check if the reference column exists.
+	if (!com.reference) {
+		msgError(msg, com, `Error: No reference column set for input command '${command}'.`)
+		return
+	}
+	if (!outputSheet.headerValues.find(value => value === com.reference)) {
+		msgError(msg, com, `Error: Reference column header '${com.reference}' for input command '${command}' not found.`)
+		return
+	}
+
 	// Create a new row if needed.
 	if (!outputRow) {
 		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) }).catch(error => {
@@ -329,14 +328,17 @@ async function handleMessage(msg) {
 	}
 
 	// Update the row values.
+	if (config.rankweightcolumn) {
+		outputRow[config.rankweightcolumn] = Number(rankData.weight)
+	}
 	if (config.discordnamecolumn) {
 		outputRow[config.discordnamecolumn] = String(member.nickname || member.user.username)
 	}
 	if (config.discordrankcolumn) {
-		outputRow[config.discordrankcolumn] = String(member.roles.highest.name)
+		outputRow[config.discordrankcolumn] = String(rankData.rankid)
 	}
-	if (config.rankvaluecolumn) {
-		outputRow[config.rankvaluecolumn] = String(member.roles.highest.rawPosition)
+	if (config.ranknamecolumn) {
+		outputRow[config.ranknamecolumn] = String(rankData.rank)
 	}
 	if (config.lastupdatedcolumn) {
 		outputRow[config.lastupdatedcolumn] = formatDate(new Date(Date.now()))
