@@ -1,6 +1,7 @@
 const { loadGoogleSheet, getConfig, getCommands, getOutputSheet } = require("./googleSheet")
 const { getClient } = require("./discordBot")
 const { getUTCDate, formatDate } = require("./date")
+const { findRank } = require("./findRank.js")
 const { reportError } = require("./error")
 
 const lastReminder = {} // To prevent spamming reminders.
@@ -102,22 +103,22 @@ async function handleMessage(msg) {
 
 	// Check if the command is allowed as a channel message.
 	if (msg.guild && com.inchannel !== "TRUE") {
-		if (config.nocommandinchannel === "TRUE") {
-			msgReply(msg, com, `Command '${command} is not allowed as a channel message. Try it as a direct message.`)
-		}
+		msgReply(msg, com, `Command '${command} is not allowed as a channel message. Try it as a direct message.`)
 		return
 	}
 
 	// Check if the command is allowed as a direct message.
 	if (!msg.guild && com.indm !== "TRUE") {
-		if (config.nocommandindm === "TRUE") {
-			msgReply(msg, com, `Command '${command} is not allowed as a direct message. Try it as a channel message.`)
-		}
+		msgReply(msg, com, `Command '${command} is not allowed as a direct message. Try it as a channel message.`)
 		return
 	}
 
-	// Check if the user is of adequate rank.
+	// Find the user's highest matching rank.
 	const member = await guild.members.fetch(msg.author)
+	const rankData = findRank(member)
+	console.log("Rank Data:", rankData)
+
+	// Check if the user is of adequate rank.
 	if (com.minrank) {
 		const minrank = guild.roles.cache.find(role => role.name === com.minrank)
 		if (!minrank) {
