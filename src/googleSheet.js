@@ -63,7 +63,7 @@ async function loadGoogleSheet(reportError) {
 	})
 
 	// Check for mandatory configuration settings.
-	const mandatoryConfigs = ["serverid", "ranksheet", "commandsheet", "outputsheet", "allothersrankid", "leftserverrankid", "discordtagcolumn", "rankweightcolumn"]
+	const mandatoryConfigs = ["serverid", "ranksheet", "commandsheet", "outputsheet", "allothersrankid", "leftserverrankid", "discordidcolumn"]
 	for (let i in mandatoryConfigs) {
 		const mandatoryConfig = mandatoryConfigs[i]
 		if (!config[mandatoryConfig]) {

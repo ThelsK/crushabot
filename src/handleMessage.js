@@ -139,8 +139,8 @@ async function handleMessage(msg) {
 	const outputRows = await outputSheet.getRows()
 
 	// Check if there is an entry for the current user.
-	const discordTag = `${member.user.username}#${member.user.discriminator}`
-	let outputRow = outputRows.find(row => row[config.discordtagcolumn] === discordTag)
+	let discordTag = `${member.user.username}#${member.user.discriminator}`
+	let outputRow = outputRows.find(row => row[config.discordidcolumn] === member.id)
 
 	// Resolve stats type commands.
 	if (com.type === "data") {
@@ -152,14 +152,14 @@ async function handleMessage(msg) {
 			return
 		}
 
-		const outputType = outputRows.find(row => row[config.discordtagcolumn] === "type")
+		const outputType = outputRows.find(row => row[config.discordidcolumn] === "type")
 		if (!outputType) {
-			msgError(msg, com, `Error: Output row with Discord Tag 'type' not found.`)
+			msgError(msg, com, `Error: Output row with Discord ID 'type' not found.`)
 			return
 		}
-		const outputDesc = outputRows.find(row => row[config.discordtagcolumn] === "description")
+		const outputDesc = outputRows.find(row => row[config.discordidcolumn] === "description")
 		if (!outputDesc) {
-			msgError(msg, com, `Error: Output row with Discord Tag 'description' not found.`)
+			msgError(msg, com, `Error: Output row with Discord ID 'description' not found.`)
 			return
 		}
 
@@ -321,18 +321,24 @@ async function handleMessage(msg) {
 
 	// Create a new row if needed.
 	if (!outputRow) {
-		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) }).catch(error => {
+		outputRow = await outputSheet.addRow({ [config.discordidcolumn]: String(member.id) }).catch(error => {
 			reportIssue(`Error: Unable to create new output row for the Google Sheets document.`)
 			throw error
 		})
 	}
 
 	// Update the row values.
-	if (config.rankweightcolumn) {
-		outputRow[config.rankweightcolumn] = Number(rankData.weight)
+	if (config.discordtagcolumn) {
+		outputRow[config.discordtagcolumn] = String(discordTag)
 	}
 	if (config.discordnamecolumn) {
 		outputRow[config.discordnamecolumn] = String(member.nickname || member.user.username)
+	}
+	if (config.lastupdatedcolumn) {
+		outputRow[config.lastupdatedcolumn] = formatDate(new Date(Date.now()))
+	}
+	if (config.updatedvaluecolumn) {
+		outputRow[config.updatedvaluecolumn] = new Date(Date.now()).getTime()
 	}
 	if (config.discordrankcolumn) {
 		outputRow[config.discordrankcolumn] = String(rankData.rankid)
@@ -340,11 +346,8 @@ async function handleMessage(msg) {
 	if (config.ranknamecolumn) {
 		outputRow[config.ranknamecolumn] = String(rankData.rank)
 	}
-	if (config.lastupdatedcolumn) {
-		outputRow[config.lastupdatedcolumn] = formatDate(new Date(Date.now()))
-	}
-	if (config.updatedvaluecolumn) {
-		outputRow[config.updatedvaluecolumn] = new Date(Date.now()).getTime()
+	if (config.rankweightcolumn) {
+		outputRow[config.rankweightcolumn] = String(rankData.weight)
 	}
 	outputRow[com.reference] = String(parameter)
 	await outputRow.save().catch(error => {
