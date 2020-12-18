@@ -74,12 +74,7 @@ async function handleMessage(msg) {
 
 	// Check if the command exists.
 	if (!com) {
-		if (!command.startsWith("!")) {
-			return
-		}
-		if (msg.guild && config.nocommandinchannel !== "TRUE") {
-			return
-		} else if (!msg.guild && config.nocommandindm !== "TRUE") {
+		if (msg.guild && !command.startsWith("!")) {
 			return
 		}
 		if (commands["!help"]) {
@@ -87,17 +82,6 @@ async function handleMessage(msg) {
 		} else {
 			msgReply(msg, com, `Unknown command '${command}'.`)
 		}
-		return
-	}
-
-	// Check if the command has a valid command type.
-	if (!com.type) {
-		msgError(msg, com, `Error: No command type set for '${command}'.`)
-		return
-	}
-	const types = ["info", "data", "flag", "text", "number", "date"]
-	if (!types.find(type => type === com.type)) {
-		msgError(msg, com, `Error: Unknown command type '${com.type}' set for '${command}'.`)
 		return
 	}
 
@@ -113,6 +97,17 @@ async function handleMessage(msg) {
 		return
 	}
 
+	// Check if the command has a valid command type.
+	if (!com.type) {
+		msgError(msg, com, `Error: No command type set for '${command}'.`)
+		return
+	}
+	const types = ["info", "data", "flag", "text", "number", "date"]
+	if (!types.find(type => type === com.type)) {
+		msgError(msg, com, `Error: Unknown command type '${com.type}' set for '${command}'.`)
+		return
+	}
+
 	// Find the user's highest matching rank.
 	const member = await guild.members.fetch(msg.author)
 	const rankData = findRank(member)
@@ -120,13 +115,8 @@ async function handleMessage(msg) {
 
 	// Check if the user is of adequate rank.
 	if (com.minrank) {
-		const minrank = guild.roles.cache.find(role => role.name === com.minrank)
-		if (!minrank) {
-			msgError(msg, com, `Error: Minimum rank '${com.minrank}' for command '${command}' not found.`)
-			return
-		}
-		if (minrank.rawPosition > member.roles.highest.rawPosition) {
-			msgReply(msg, com, `Only users with rank '${com.minrank}' or higher can use the '${command}' command.`)
+		if (rankData.command < com.minrank) {
+			msgReply(msg, com, `You do not have a sufficient rank to use the '${command}' command.`)
 			return
 		}
 	}
@@ -373,36 +363,43 @@ async function msgReply(msg, com, text) {
 	console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
 	console.log(`=> ${msg.author.username}#${msg.author.discriminator}: ${text}`)
 	const config = getConfig()
-	const types = ["info", "data", "flag", "text", "number", "date"]
-	let deletemsg = false
+	let replytomsg = false
 	let replyindm = false
-	if (!com || !types.find(type => com.type === type)) {
-		if (config.deletemsg === "TRUE") {
-			deletemsg = true
-		}
-		if (config.replyindm === "TRUE") {
-			replyindm = true
-		}
-	} else {
-		if (com.deletemsg === "TRUE") {
-			deletemsg = true
-		}
-		if (com.replyindm === "TRUE") {
-			replyindm = true
-		}
+	let deletemsg = false
+
+	if (!com && msg.guild && config.nocommandinchannel === "TRUE" && config.replyindm === "TRUE") {
+		replyindm = true
+	} else if (!com && msg.guild && config.nocommandinchannel === "TRUE") {
+		replytomsg = true
+	} else if (!com && !msg.guild && config.nocommandindm === "TRUE") {
+		replyindm = true
+	} else if (com && com.replyindm === "TRUE") {
+		replyindm = true
+	} else if (com) {
+		replytomsg = true
 	}
-	if (replyindm) {
-		await msg.author.send(text).catch(error => {
-			reportError(`Error: Unable to send a direct message to '${msg.author.username}#${msg.author.discriminator}'.`)
-			throw error
-		})
-	} else {
+
+	if (!com && msg.guild && config.deletemsg === "TRUE") {
+		deletemsg = true
+	} else if (com && msg.guild && com.deletemsg === "TRUE") {
+		deletemsg = true
+	}
+
+	if (replytomsg) {
 		await msg.reply(text).catch(error => {
 			reportError(`Error: Unable to send a reply to '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error
 		})
 	}
-	if (msg.guild && deletemsg) {
+
+	if (replyindm) {
+		await msg.author.send(text).catch(error => {
+			reportError(`Error: Unable to send a direct message to '${msg.author.username}#${msg.author.discriminator}'.`)
+			throw error
+		})
+	}
+
+	if (deletemsg) {
 		await msg.delete().catch(error => {
 			reportError(`Error: Unable to delete the message from '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error
