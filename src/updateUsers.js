@@ -5,8 +5,6 @@ const { reportError } = require("./error")
 
 async function updateUsers() {
 
-	console.log("Updating users 1")
-
 	// Refresh the Google Sheets document.
 	let success = await loadGoogleSheet()
 	if (!success) {
@@ -15,16 +13,13 @@ async function updateUsers() {
 	const config = getConfig()
 	const client = getClient()
 
-	console.log("Updating users 2")
-
 	// Check if the Bot is connected to the correct server.
 	const guild = client.guilds.cache.find(checkGuild => checkGuild.id === config.serverid)
 	if (!guild) {
 		reportError(`Error: I am not connected to the Server with the configured Server ID.`)
 		return
 	}
-
-	console.log("Updating users 3")
+	const members = await guild.members.fetch()
 
 	// Load the Output sheet.
 	const outputSheet = getOutputSheet()
@@ -32,29 +27,24 @@ async function updateUsers() {
 		reportError(`Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
 		return
 	}
+	//const fetchedMembers = await guild.members.fetch()
 
-	console.log("Updating users 4")
 
 	// Check all rows.
-	await guild.members.fetch({ query: '*', limit: 10000 })
-	console.log("Members:", guild.members)
 	const outputRows = await outputSheet.getRows()
 	outputRows.forEach(async outputRow => {
 
 		// Check if it is an actual user row.
-		const discordTag = outputRow[config.discordtagcolumn]
-		if (!discordTag || discordTag.indexOf("#") === -1) {
+		const discordID = String(outputRow[config.discordidcolumn])
+		if (!discordID || discordID === "type" || discordID === "description") {
 			return
 		}
-		console.log("Discord Tag:", discordTag)
-		const member = await guild.members.cache.find(user => discordTag === `${user.user.username}#${user.user.discriminator}`)
-		console.log("Member:", member)
+		const member = members.find(memberEntry => memberEntry.id === discordID)
 		const rankData = findRank(member)
-		console.log("rankData:", rankData)
 
 		// Update the row values.
-		if (config.rankweightcolumn) {
-			outputRow[config.rankweightcolumn] = Number(rankData.weight)
+		if (member && config.discordtagcolumn) {
+			outputRow[config.discordtagcolumn] = String(`${member.user.username}#${member.user.discriminator}`)
 		}
 		if (member && config.discordnamecolumn) {
 			outputRow[config.discordnamecolumn] = String(member.nickname || member.user.username)
@@ -64,6 +54,9 @@ async function updateUsers() {
 		}
 		if (config.ranknamecolumn) {
 			outputRow[config.ranknamecolumn] = String(rankData.rank)
+		}
+		if (config.rankweightcolumn) {
+			outputRow[config.rankweightcolumn] = Number(rankData.weight)
 		}
 		await outputRow.save().catch(error => {
 			reportError(`Error: Unable to save output data to the Google Sheets document.`)
