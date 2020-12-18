@@ -12,7 +12,7 @@ function findRank(member) {
 		reportError(`Error: Cannot find rank '${config.leftserverrankid}'.`)
 		return {
 			rankid: config.leftserverrankid,
-			rank: "Left the Server",
+			rank: "Left the server",
 			weight: 0,
 			command: 0,
 		}
@@ -31,7 +31,7 @@ function findRank(member) {
 	reportError(`Error: Cannot find rank '${config.allothersrankid}'.`)
 	return {
 		rankid: config.allothersrankid,
-		rank: "Left the Server",
+		rank: "Rank not found",
 		weight: 0,
 		command: 0,
 	}
