@@ -1,4 +1,4 @@
-# Crusha BOT
+# Crusha Bot
 
 Crusha Bot is a Discord Bot meant to run in a single Discord Server. Members of that Discord Server can use commands to choose values that will be stored in a Google Sheet, one row per member. The Bot is intended to be used by streamers, allowing their patrons to specify features such as the name of their ingame character, but it can be used for other purposes where someone wants to gather values from individual members.
 
@@ -259,7 +259,7 @@ Keep in mind that if you specify a minimum rank for certain commands, these valu
 
 Two rows hold settings that are used for displaying the values when a user performs a data command to see their stored values. These rows must have the texts "type" and "description" in the column with the "discordtagcolumn" value. The "type" row determines in what format the value in that column is displayed (flag, text, number or date). If left blank, the value in that column is not displayed. The "description" row holds the label for the value, so the user can see which value is what. Note that these rows do not need to be near the top of the Worksheet.
 
-## _Versions_
+## _Version History_
 
 * 1.0.3
 	* Fix: Arrayformulas are no longer accepted as valid commands.

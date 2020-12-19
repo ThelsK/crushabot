@@ -12,8 +12,14 @@ async function initialize() {
 		process.exit()
 	}
 
+	// Initialize the Discord client.
+	let success = await loginDiscordClient(reportError, handleMessage)
+	if (!success) {
+		process.exit()
+	}
+
 	// Authorize the Google service worker.
-	let success = await authServiceWorker(reportError)
+	success = await authServiceWorker(reportError)
 	if (!success) {
 		process.exit()
 	}
@@ -24,15 +30,10 @@ async function initialize() {
 		process.exit()
 	}
 
-	// Initialize the Discord client.
-	success = await loginDiscordClient(reportError, handleMessage)
-	if (!success) {
-		process.exit()
-	}
-
 	// Update the Users every hour.
 	updateUsers()
 	setInterval(updateUsers, 3600000)
+	setInterval(authServiceWorker, 86400000)
 	console.log("Initialization completed.")
 }
 initialize()
