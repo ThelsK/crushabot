@@ -36,7 +36,7 @@ async function handleMessage(msg) {
 	}
 
 	// When receiving a channel message on the right server, ignore the incorrect channels.
-	if (msg.guild && config.inputchannel && msg.channel.name !== config.inputchannel) {
+	if (msg.guild && config.inputchannel && msg.channel.id !== config.inputchannel) {
 		return
 	}
 
