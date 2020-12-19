@@ -8,8 +8,8 @@ async function reportError(text) {
 	const config = getConfig()
 	const client = getClient()
 
-	if (config.errorchannel) {
-		const output = client.channels.cache.find(channel => config.errorchannel === channel.id)
+	if (config.errorchannelid) {
+		const output = client.channels.cache.find(channel => config.errorchannelid === channel.id)
 		if (output) {
 			output.send(text)
 		}
