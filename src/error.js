@@ -6,23 +6,25 @@ const lastReminder = {} // To prevent spamming reminders.
 async function reportError(text) {
 	console.error(`\x1b[31m${text}\x1b[00m`) // Apply red color to errors.
 	const config = getConfig()
-	if (!config.ownerid) {
+	const client = getClient()
+
+	if (config.errorchannel) {
+		const output = client.channels.cache.find(channel => config.errorchannel === channel.id)
+		if (output) {
+			output.send(text)
+		}
+	}
+
+	if (!config.erroruserid) {
 		return
 	}
 	if (lastReminder[`reportError${text}`] && Date.now() < lastReminder[`reportError${text}`] + 600000) {
 		return
 	}
-	const client = getClient()
-	console.log("Owner ID:", typeof config.ownerid, config.ownerid)
-	const owner = client.users.cache.find(user => {
-		console.log("User ID:", typeof user.id, user.id)
-		return config.ownerid === user.id
-	})
+	const owner = client.users.cache.find(user => config.erroruserid === user.id)
 	if (!owner) {
-		console.log("Owner not found")
 		return
 	}
-	console.log("Owner found")
 	lastReminder[`reportError${text}`] = Date.now()
 	await owner.send(text).catch(error => {
 		console.error(`\x1b[31mError: Unable to send direct message to '${config.ownertag}'.\x1b[00m`)

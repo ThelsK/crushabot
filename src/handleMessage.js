@@ -414,24 +414,21 @@ async function msgReply(msg, com, text) {
 
 async function msgError(msg, com, text) {
 	const config = getConfig()
-	if (!config.ownerid) {
+	if (!config.errorchannel && !config.erroruserid) {
 		msgReply(msg, com, text)
 		return
 	}
 	console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
 	reportError(text)
-	const types = ["info", "data", "flag", "text", "number", "date"]
+
 	let deletemsg = false
-	if (!com || !types.find(type => com.type === type)) {
-		if (config.deletemsg === "TRUE") {
-			deletemsg = true
-		}
-	} else {
-		if (com.deletemsg === "TRUE") {
-			deletemsg = true
-		}
+	if (!com && msg.guild && config.deletemsg === "TRUE") {
+		deletemsg = true
+	} else if (com && msg.guild && com.deletemsg === "TRUE") {
+		deletemsg = true
 	}
-	if (msg.guild && deletemsg) {
+
+	if (deletemsg) {
 		await msg.delete().catch(error => {
 			reportError(`Error: Unable to delete the message from '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error
