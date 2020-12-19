@@ -164,7 +164,7 @@ The configuration settings "serverid", "commandsheet", "outputsheet" and "discor
 
 * serverid (Mandatory)
 	* This is the Server ID for your Discord Server. To find your Server ID, rightclick your Discord Server, and open Serverconfiguration > Widget. 
-* inputchannel (Optional)
+* inputchannelid (Optional)
 	* If set, the Bot will only listen to channel messages in that channel, and ignore all other channels. If left blank, the Bot will listen to channel messages in any channel. This does not affect direct messages. Do not include the # character.
 * ownertag (Optional)
 	* If set, when the Bot runs into a configuration error, it will try to report the error to you as a direct message. If left blank, the error is either replied to a user entering a command, or not reported at all. Note that input errors from users are always replied to the user. Errors are always logged to the console log.
@@ -210,7 +210,7 @@ Each command must be placed on its own row, with the applicable values in the co
 * command
 	* This is a command that users may perform. All other values on the same row apply to this command. The command must be entered in lowercase on the Worksheet. The command is case insensitive when entered in Discord.
 * inchannel
-	* If set to "TRUE", this command can be used in channel messages on your Discord Server. If left blank, this command cannot be used in channel messages. Note that if you set an inputchannel in the general configuration, commands are restricted to that inputchannel.
+	* If set to "TRUE", this command can be used in channel messages on your Discord Server. If left blank, this command cannot be used in channel messages. Note that if you set an inputchannelid in the general configuration, commands are restricted to that inputchannelid.
 * indm
 	* If set to "TRUE", this command can be used in direct messages to the Bot. If left blank, this command cannot be used in direct messages. Note that both inchannel and indm can be set to "TRUE".
 * replyindm

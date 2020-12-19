@@ -36,7 +36,7 @@ async function handleMessage(msg) {
 	}
 
 	// When receiving a channel message on the right server, ignore the incorrect channels.
-	if (msg.guild && config.inputchannel && msg.channel.id !== config.inputchannel) {
+	if (msg.guild && config.inputchannelid && msg.channel.id !== config.inputchannelid) {
 		return
 	}
 
@@ -414,7 +414,7 @@ async function msgReply(msg, com, text) {
 
 async function msgError(msg, com, text) {
 	const config = getConfig()
-	if (!config.errorchannel && !config.erroruserid) {
+	if (!config.errorchannelid && !config.erroruserid) {
 		msgReply(msg, com, text)
 		return
 	}
