@@ -130,10 +130,10 @@ async function handleMessage(msg) {
 		return
 	}
 
-	// Load the output Sheet, and check if the Discord Tag column exists.
+	// Load the output Sheet, and check if the Discord ID column exists.
 	const outputSheet = getOutputSheet()
-	if (!outputSheet.headerValues.find(value => value === config.discordtagcolumn)) {
-		msgError(msg, com, `Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
+	if (!outputSheet.headerValues.find(value => value === config.discordidcolumn)) {
+		msgError(msg, com, `Error: Discord Tag column header '${config.discordidcolumn}' not found.`)
 		return
 	}
 	const outputRows = await outputSheet.getRows()
@@ -414,7 +414,7 @@ async function msgReply(msg, com, text) {
 
 async function msgError(msg, com, text) {
 	const config = getConfig()
-	if (!config.ownertag) {
+	if (!config.ownerid) {
 		msgReply(msg, com, text)
 		return
 	}
