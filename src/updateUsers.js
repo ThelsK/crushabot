@@ -6,7 +6,7 @@ const { reportError } = require("./error")
 async function updateUsers() {
 
 	// Refresh the Google Sheets document.
-	let success = await loadGoogleSheet()
+	let success = await loadGoogleSheet(reportError)
 	if (!success) {
 		return
 	}
