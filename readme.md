@@ -313,6 +313,10 @@ If you name the Configuration worksheet to something other than "botconfig", you
 
 ## _Version History_
 
+* 1.1.1
+	* Fix: The Bot no longer logs received commands and its own replies to those commands for commands that the Bot ignored instead of actually replying to.
+	* Fix: Error messages regarding the Discord ID column on the output sheet no longer refer to this column as the Discord Tag column.
+	* Fix: If there was an issue accessing the Google Sheets API after the Bot had been active for more than 10 minutes, the Bot would crash upon trying to post an error message. This has been fixed.
 * 1.1.0
 	* Overhaul the way the Bot determines a user's rank. It no longer selects the user's highest rank, but instead compares the user's rank against a whitelist of ranks.
 		* A new Ranks worksheet tab must be added to the Google spreadsheet with 4 columns: "rankid", "rank", "weight" and "command".

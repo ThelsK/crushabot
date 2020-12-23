@@ -14,7 +14,7 @@ async function handleMessage(msg) {
 	}
 
 	// Refresh the Google Sheets document.
-	let success = await loadGoogleSheet()
+	let success = await loadGoogleSheet(reportError)
 	if (!success) {
 		return
 	}
@@ -133,13 +133,13 @@ async function handleMessage(msg) {
 	// Load the output Sheet, and check if the Discord ID column exists.
 	const outputSheet = getOutputSheet()
 	if (!outputSheet.headerValues.find(value => value === config.discordidcolumn)) {
-		msgError(msg, com, `Error: Discord Tag column header '${config.discordidcolumn}' not found.`)
+		msgError(msg, com, `Error: Discord ID column header '${config.discordidcolumn}' not found.`)
 		return
 	}
 	const outputRows = await outputSheet.getRows()
 
 	// Check if there is an entry for the current user.
-	let discordTag = `${member.user.username}#${member.user.discriminator}`
+	const discordTag = `${member.user.username}#${member.user.discriminator}`
 	let outputRow = outputRows.find(row => row[config.discordidcolumn] === member.id)
 
 	// Resolve stats type commands.
@@ -365,8 +365,6 @@ async function handleMessage(msg) {
 }
 
 async function msgReply(msg, com, text) {
-	console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
-	console.log(`=> ${msg.author.username}#${msg.author.discriminator}: ${text}`)
 	const config = getConfig()
 	let replytomsg = false
 	let replyindm = false
@@ -388,6 +386,11 @@ async function msgReply(msg, com, text) {
 		deletemsg = true
 	} else if (com && msg.guild && com.deletemsg === "TRUE") {
 		deletemsg = true
+	}
+
+	if (replytomsg || replyindm) {
+		console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
+		console.log(`=> ${msg.author.username}#${msg.author.discriminator}: ${text}`)
 	}
 
 	if (replytomsg) {
