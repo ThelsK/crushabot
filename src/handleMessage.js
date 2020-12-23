@@ -139,7 +139,7 @@ async function handleMessage(msg) {
 	const outputRows = await outputSheet.getRows()
 
 	// Check if there is an entry for the current user.
-	let discordTag = `${member.user.username}#${member.user.discriminator}`
+	const discordTag = `${member.user.username}#${member.user.discriminator}`
 	let outputRow = outputRows.find(row => row[config.discordidcolumn] === member.id)
 
 	// Resolve stats type commands.
