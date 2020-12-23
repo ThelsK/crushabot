@@ -88,6 +88,12 @@ async function loadGoogleSheet(reportError) {
 		}
 	})
 
+	// Format the weight and command as numbers.
+	ranks.forEach(rank => {
+		rank.weight = Number(rank.weight)
+		rank.command = Number(rank.command)
+	})
+
 	// Load the Commands.
 	if (!sheets[config.commandsheet]) {
 		reportError(`Error: Cannot find command worksheet with title '${config.commandsheet}'.`)

@@ -125,7 +125,7 @@ async function handleMessage(msg) {
 		if (!com.reply) {
 			msgReply(msg, com, `Error: No reply set for '${command}'.`)
 		} else {
-			msgReply(msg, com, com.reply)
+			msgReply(msg, com, com.reply + com.suffix)
 		}
 		return
 	}
@@ -166,19 +166,22 @@ async function handleMessage(msg) {
 		let reply = `${com.reply || "Data for user:"} ${discordTag}`
 		outputSheet.headerValues.forEach(value => {
 			if (outputType[value] === "flag" && outputRow[value] === "TRUE") {
-				reply = `${reply}\n${outputDesc[value] || value} ${config.textenabled || "On"}`
+				reply += `\n${outputDesc[value] || value} ${config.textenabled || "On"}`
+			} else if (outputType[value] === "flag" && outputRow[value] !== "FALSE" && config.defaultflagvalue === "TRUE") {
+				reply += `\n${outputDesc[value] || value} ${config.textenabled || "On"}`
 			} else if (outputType[value] === "flag") {
-				reply = `${reply}\n${outputDesc[value] || value} ${config.textdisabled || "Off"}`
+				reply += `\n${outputDesc[value] || value} ${config.textdisabled || "Off"}`
 			} else if (outputType[value] === "text") {
-				reply = `${reply}\n${outputDesc[value] || value} ${outputRow[value] || "<blank>"}`
+				reply += `\n${outputDesc[value] || value} ${outputRow[value] || "<blank>"}`
 			} else if (outputType[value] === "number") {
-				reply = `${reply}\n${outputDesc[value] || value} ${Number(outputRow[value]) || "0"}`
+				reply += `\n${outputDesc[value] || value} ${Number(outputRow[value]) || "0"}`
 			} else if (outputType[value] === "date" && Number(outputRow[value])) {
-				reply = `${reply}\n${outputDesc[value] || value} ${formatDate(new Date(Number(outputRow[value])))}`
+				reply += `\n${outputDesc[value] || value} ${formatDate(new Date(Number(outputRow[value])))}`
 			} else if (outputType[value] === "date") {
-				reply = `${reply}\n${outputDesc[value] || value} ${outputRow[value] || "<blank>"}`
+				reply += `\n${outputDesc[value] || value} ${outputRow[value] || "<blank>"}`
 			}
 		})
+		reply += com.suffix
 		msgReply(msg, com, reply)
 		return
 	}
@@ -361,7 +364,7 @@ async function handleMessage(msg) {
 	} else if (parameter === false) {
 		parameter = config.textdisabled || "Off"
 	}
-	msgReply(msg, com, `${com.reply || `${com.reference} set to`} ${parameter}`)
+	msgReply(msg, com, `${com.reply || `${com.reference} set to`} ${parameter}${com.suffix}`)
 }
 
 async function msgReply(msg, com, text) {
