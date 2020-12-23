@@ -125,7 +125,7 @@ async function handleMessage(msg) {
 		if (!com.reply) {
 			msgReply(msg, com, `Error: No reply set for '${command}'.`)
 		} else {
-			msgReply(msg, com, com.reply + com.suffix)
+			msgReply(msg, com, `${com.reply}${com.suffix || ""}`)
 		}
 		return
 	}
@@ -181,7 +181,7 @@ async function handleMessage(msg) {
 				reply += `\n${outputDesc[value] || value} ${outputRow[value] || "<blank>"}`
 			}
 		})
-		reply += com.suffix
+		reply += com.suffix || ""
 		msgReply(msg, com, reply)
 		return
 	}
@@ -364,7 +364,7 @@ async function handleMessage(msg) {
 	} else if (parameter === false) {
 		parameter = config.textdisabled || "Off"
 	}
-	msgReply(msg, com, `${com.reply || `${com.reference} set to`} ${parameter}${com.suffix}`)
+	msgReply(msg, com, `${com.reply || `${com.reference} set to`} ${parameter}${com.suffix || ""}`)
 }
 
 async function msgReply(msg, com, text) {
