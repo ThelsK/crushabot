@@ -155,7 +155,7 @@ The Bot makes use of three different Worksheet tabs:
 * One tab is used to define the commands available to users.
 * One tab is used to output the values that users enter using the input commands.
 
-If the instructions are unclear, please check the [https://docs.google.com/spreadsheets/d/1jx2pXn8Ew3sLKl4FhkOA6A5Jkc8q4-5g4KjrdAAjKqE](Crusha Bot Template) for an example.
+If the instructions are unclear, please check the [Crusha Bot Template](https://docs.google.com/spreadsheets/d/1jx2pXn8Ew3sLKl4FhkOA6A5Jkc8q4-5g4KjrdAAjKqE) for an example.
 
 Note: Some settings require you to provide a Server ID, Role ID, Channel ID or User ID. To access IDs, you need to enable Developer mode inside your Discord client. Go to Settings, Appearance, and scroll to the bottom to enable Developer mode. Once enabled, you can rightclick Channels and Users to get their ID. Server and Role IDs can be found in the Server settings.
 
