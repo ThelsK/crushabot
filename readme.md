@@ -2,7 +2,9 @@
 
 Crusha Bot is a Discord Bot meant to run in a single Discord Server. Members of that Discord Server can use commands to choose values that will be stored in a Google Sheet, one row per member. The Bot is intended to be used by streamers, allowing their patrons to specify features such as the name of their ingame character, but it can be used for other purposes where someone wants to gather values from individual members.
 
-The Bot uses ENV parameters to connect to Discord and the Google Sheet. All other configuration settings are loaded from the Google Sheet, to simplify further configuration. The Bot can be configured to only allow members of a specific rank or higher to specify features. The Bot can also include the rank of each member, allowing the use of further weights. The Bot accepts commands from both channel messages and direct messages.
+The Bot uses ENV parameters to connect to Discord and the Google Sheet. All other configuration settings are loaded from the Google Sheet, to simplify further configuration. The Bot can be configured to only allow members of specific ranks to specify features. The Bot can also include a weight based on the rank or ranks of each member, which can be used to affect random selection chances. The Bot accepts commands from both channel messages and direct messages.
+
+Most of the configuration and all of the output is stored in a Google Spreadsheet, making it easy for people to see or alter the configuration and output data. A template is included, which you can copy and use as the basis of your own configuration and output. This template includes buttons to randomly pick users from your output data based on their weight value.
 
 Note, to support direct messages, the Bot can only support a single Discord Server. If the Bot would support multiple Discord Servers, it would have no way of telling for which Discord Server the direct messages are intended. To support another Discord Server, you must run a separate bot with separate ENV parameters.
 
@@ -29,7 +31,7 @@ The official Discord API for Node.js. Used for all interaction with Discord.
 
 ### [google-spreadsheet](https://theoephraim.github.io/node-google-spreadsheet)
 
-A third party Google Sheets API wrapper for Node.js. Used for reading from and writing to the Google Sheet.
+A third party Google Sheets API wrapper for Node.js. Used for reading from and writing to the Google Spreadsheet.
 
 ### [dateformat](https://github.com/felixge/node-dateformat)
 
@@ -84,9 +86,9 @@ A function to format date and time. Used for formatting dates.
 	* Click on "Google APIs" in the top left corner of the page.
 	* Click on "Enable APIs and Services", click on "Google Sheets API", and click on Enable.
 
-### Create the Google Worksheet document.
+### Create the Google Spreadsheet document.
 
-You can either create a new sheet from scratch and fill in everything yourself, or create a copy of the template document and adjust it to your needs.
+You can either create a new spreadsheet from scratch and fill in everything yourself, or create a copy of the template document and adjust it to your needs. The latter is recommended.
 
 * Method 1: Create a new blank document:
 	* Go to https://docs.google.com/spreadsheets
