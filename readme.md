@@ -313,6 +313,17 @@ If you name the Configuration worksheet to something other than "botconfig", you
 
 ## _Version History_
 
+* 1.1.2
+	* Add a new "suffix" column to the Commands worksheet.
+		* When a user enters a command successfully, the Bot will add the suffix to the end of the reply. If the reply includes user data, the suffix is added after the user data.
+		* The suffix is added without spacing or newlines. Any desired spacing or newlines need to be included in the suffix.
+		* The suffix is only added to replies to successful commands. The suffix can be left blank.
+	* Improve the detection and calculation of a user's weight and command value.
+		* The user now receives the weight of the matching rank with the highest weight value, and the command value of the matching rank with the highest command value, instead of the weight and command value of the first match found.
+		* Add a new configuration option "addweight". If set to "TRUE", the user instead receives the weight of all matching ranks combined. Note: 
+		* Add a new configuration option "maxweight". If provided, users with a higher weight have their weight reduced to this value. If left blank, there is no maximum weight value. While this option is intended to be used in combination with the "addweight" option, it also applies when "addweight" is disabled.
+		* Note: The "allothersrankid" and "leftserverrankid" ranks do not affect this new weight and command value calculation. These ranks are only used if the user does not have a matching rank with any of the other listed ranks.
+	* Add a new configuration option "defaultflagvalue". If set to "TRUE", any flags that are left unset by the user are treated as "TRUE" rather than "FALSE" by both the bot and the Roll buttons. Note that this update does not apply to the Roll buttons of older copies of the template.
 * 1.1.1
 	* Fix: The Bot no longer logs received commands and its own replies to those commands for commands that the Bot ignored instead of actually replying to.
 	* Fix: Error messages regarding the Discord ID column on the output sheet no longer refer to this column as the Discord Tag column.
