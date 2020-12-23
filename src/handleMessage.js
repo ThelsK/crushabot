@@ -365,8 +365,6 @@ async function handleMessage(msg) {
 }
 
 async function msgReply(msg, com, text) {
-	console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
-	console.log(`=> ${msg.author.username}#${msg.author.discriminator}: ${text}`)
 	const config = getConfig()
 	let replytomsg = false
 	let replyindm = false
@@ -388,6 +386,11 @@ async function msgReply(msg, com, text) {
 		deletemsg = true
 	} else if (com && msg.guild && com.deletemsg === "TRUE") {
 		deletemsg = true
+	}
+
+	if (replytomsg || replyindm) {
+		console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
+		console.log(`=> ${msg.author.username}#${msg.author.discriminator}: ${text}`)
 	}
 
 	if (replytomsg) {
