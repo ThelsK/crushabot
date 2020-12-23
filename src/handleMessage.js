@@ -133,7 +133,7 @@ async function handleMessage(msg) {
 	// Load the output Sheet, and check if the Discord ID column exists.
 	const outputSheet = getOutputSheet()
 	if (!outputSheet.headerValues.find(value => value === config.discordidcolumn)) {
-		msgError(msg, com, `Error: Discord Tag column header '${config.discordidcolumn}' not found.`)
+		msgError(msg, com, `Error: Discord ID column header '${config.discordidcolumn}' not found.`)
 		return
 	}
 	const outputRows = await outputSheet.getRows()
