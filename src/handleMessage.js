@@ -1,6 +1,7 @@
 const { loadGoogleSheet, getConfig, getCommands, getOutputSheet } = require("./googleSheet")
 const { getClient } = require("./discordBot")
 const { getUTCDate, formatDate } = require("./date")
+const { findRank } = require("./findRank.js")
 const { reportError } = require("./error")
 
 const lastReminder = {} // To prevent spamming reminders.
@@ -35,7 +36,7 @@ async function handleMessage(msg) {
 	}
 
 	// When receiving a channel message on the right server, ignore the incorrect channels.
-	if (msg.guild && config.inputchannel && msg.channel.name !== config.inputchannel) {
+	if (msg.guild && config.inputchannelid && msg.channel.id !== config.inputchannelid) {
 		return
 	}
 
@@ -73,12 +74,7 @@ async function handleMessage(msg) {
 
 	// Check if the command exists.
 	if (!com) {
-		if (!command.startsWith("!")) {
-			return
-		}
-		if (msg.guild && config.nocommandinchannel !== "TRUE") {
-			return
-		} else if (!msg.guild && config.nocommandindm !== "TRUE") {
+		if (msg.guild && !command.startsWith("!")) {
 			return
 		}
 		if (commands["!help"]) {
@@ -86,6 +82,18 @@ async function handleMessage(msg) {
 		} else {
 			msgReply(msg, com, `Unknown command '${command}'.`)
 		}
+		return
+	}
+
+	// Check if the command is allowed as a channel message.
+	if (msg.guild && com.inchannel !== "TRUE") {
+		msgReply(msg, com, `Command '${command} is not allowed as a channel message. Try it as a direct message.`)
+		return
+	}
+
+	// Check if the command is allowed as a direct message.
+	if (!msg.guild && com.indm !== "TRUE") {
+		msgReply(msg, com, `Command '${command} is not allowed as a direct message. Try it as a channel message.`)
 		return
 	}
 
@@ -100,32 +108,14 @@ async function handleMessage(msg) {
 		return
 	}
 
-	// Check if the command is allowed as a channel message.
-	if (msg.guild && com.inchannel !== "TRUE") {
-		if (config.nocommandinchannel === "TRUE") {
-			msgReply(msg, com, `Command '${command} is not allowed as a channel message. Try it as a direct message.`)
-		}
-		return
-	}
-
-	// Check if the command is allowed as a direct message.
-	if (!msg.guild && com.indm !== "TRUE") {
-		if (config.nocommandindm === "TRUE") {
-			msgReply(msg, com, `Command '${command} is not allowed as a direct message. Try it as a channel message.`)
-		}
-		return
-	}
+	// Find the user's highest matching rank.
+	const member = await guild.members.fetch(msg.author)
+	const rankData = findRank(member)
 
 	// Check if the user is of adequate rank.
-	const member = await guild.members.fetch(msg.author)
 	if (com.minrank) {
-		const minrank = guild.roles.cache.find(role => role.name === com.minrank)
-		if (!minrank) {
-			msgError(msg, com, `Error: Minimum rank '${com.minrank}' for command '${command}' not found.`)
-			return
-		}
-		if (minrank.rawPosition > member.roles.highest.rawPosition) {
-			msgReply(msg, com, `Only users with rank '${com.minrank}' or higher can use the '${command}' command.`)
+		if (rankData.command < com.minrank) {
+			msgReply(msg, com, `You do not have a sufficient rank to use the '${command}' command.`)
 			return
 		}
 	}
@@ -140,17 +130,17 @@ async function handleMessage(msg) {
 		return
 	}
 
-	// Load the output Sheet, and check if the Discord Tag column exists.
+	// Load the output Sheet, and check if the Discord ID column exists.
 	const outputSheet = getOutputSheet()
-	if (!outputSheet.headerValues.find(value => value === config.discordtagcolumn)) {
-		msgError(msg, com, `Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
+	if (!outputSheet.headerValues.find(value => value === config.discordidcolumn)) {
+		msgError(msg, com, `Error: Discord Tag column header '${config.discordidcolumn}' not found.`)
 		return
 	}
 	const outputRows = await outputSheet.getRows()
 
 	// Check if there is an entry for the current user.
-	const discordTag = `${member.user.username}#${member.user.discriminator}`
-	let outputRow = outputRows.find(row => row[config.discordtagcolumn] === discordTag)
+	let discordTag = `${member.user.username}#${member.user.discriminator}`
+	let outputRow = outputRows.find(row => row[config.discordidcolumn] === member.id)
 
 	// Resolve stats type commands.
 	if (com.type === "data") {
@@ -162,14 +152,14 @@ async function handleMessage(msg) {
 			return
 		}
 
-		const outputType = outputRows.find(row => row[config.discordtagcolumn] === "type")
+		const outputType = outputRows.find(row => row[config.discordidcolumn] === "type")
 		if (!outputType) {
-			msgError(msg, com, `Error: Output row with Discord Tag 'type' not found.`)
+			msgError(msg, com, `Error: Output row with Discord ID 'type' not found.`)
 			return
 		}
-		const outputDesc = outputRows.find(row => row[config.discordtagcolumn] === "description")
+		const outputDesc = outputRows.find(row => row[config.discordidcolumn] === "description")
 		if (!outputDesc) {
-			msgError(msg, com, `Error: Output row with Discord Tag 'description' not found.`)
+			msgError(msg, com, `Error: Output row with Discord ID 'description' not found.`)
 			return
 		}
 
@@ -190,16 +180,6 @@ async function handleMessage(msg) {
 			}
 		})
 		msgReply(msg, com, reply)
-		return
-	}
-
-	// Check if the reference column exists.
-	if (!com.reference) {
-		msgError(msg, com, `Error: No reference column set for input command '${command}'.`)
-		return
-	}
-	if (!outputSheet.headerValues.find(value => value === com.reference)) {
-		msgError(msg, com, `Error: Reference column header '${com.reference}' for input command '${command}' not found.`)
 		return
 	}
 
@@ -329,29 +309,45 @@ async function handleMessage(msg) {
 		parameter = formatDate(date)
 	}
 
+	// Check if the reference column exists.
+	if (!com.reference) {
+		msgError(msg, com, `Error: No reference column set for input command '${command}'.`)
+		return
+	}
+	if (!outputSheet.headerValues.find(value => value === com.reference)) {
+		msgError(msg, com, `Error: Reference column header '${com.reference}' for input command '${command}' not found.`)
+		return
+	}
+
 	// Create a new row if needed.
 	if (!outputRow) {
-		outputRow = await outputSheet.addRow({ [config.discordtagcolumn]: String(discordTag) }).catch(error => {
+		outputRow = await outputSheet.addRow({ [config.discordidcolumn]: String(member.id) }).catch(error => {
 			reportIssue(`Error: Unable to create new output row for the Google Sheets document.`)
 			throw error
 		})
 	}
 
 	// Update the row values.
+	if (config.discordtagcolumn) {
+		outputRow[config.discordtagcolumn] = String(discordTag)
+	}
 	if (config.discordnamecolumn) {
 		outputRow[config.discordnamecolumn] = String(member.nickname || member.user.username)
-	}
-	if (config.discordrankcolumn) {
-		outputRow[config.discordrankcolumn] = String(member.roles.highest.name)
-	}
-	if (config.rankvaluecolumn) {
-		outputRow[config.rankvaluecolumn] = String(member.roles.highest.rawPosition)
 	}
 	if (config.lastupdatedcolumn) {
 		outputRow[config.lastupdatedcolumn] = formatDate(new Date(Date.now()))
 	}
 	if (config.updatedvaluecolumn) {
 		outputRow[config.updatedvaluecolumn] = new Date(Date.now()).getTime()
+	}
+	if (config.discordrankcolumn) {
+		outputRow[config.discordrankcolumn] = String(rankData.rankid)
+	}
+	if (config.ranknamecolumn) {
+		outputRow[config.ranknamecolumn] = String(rankData.rank)
+	}
+	if (config.rankweightcolumn) {
+		outputRow[config.rankweightcolumn] = String(rankData.weight)
 	}
 	outputRow[com.reference] = String(parameter)
 	await outputRow.save().catch(error => {
@@ -372,36 +368,43 @@ async function msgReply(msg, com, text) {
 	console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
 	console.log(`=> ${msg.author.username}#${msg.author.discriminator}: ${text}`)
 	const config = getConfig()
-	const types = ["info", "data", "flag", "text", "number", "date"]
-	let deletemsg = false
+	let replytomsg = false
 	let replyindm = false
-	if (!com || !types.find(type => com.type === type)) {
-		if (config.deletemsg === "TRUE") {
-			deletemsg = true
-		}
-		if (config.replyindm === "TRUE") {
-			replyindm = true
-		}
-	} else {
-		if (com.deletemsg === "TRUE") {
-			deletemsg = true
-		}
-		if (com.replyindm === "TRUE") {
-			replyindm = true
-		}
+	let deletemsg = false
+
+	if (!com && msg.guild && config.nocommandinchannel === "TRUE" && config.replyindm === "TRUE") {
+		replyindm = true
+	} else if (!com && msg.guild && config.nocommandinchannel === "TRUE") {
+		replytomsg = true
+	} else if (!com && !msg.guild && config.nocommandindm === "TRUE") {
+		replyindm = true
+	} else if (com && com.replyindm === "TRUE") {
+		replyindm = true
+	} else if (com) {
+		replytomsg = true
 	}
-	if (replyindm) {
-		await msg.author.send(text).catch(error => {
-			reportError(`Error: Unable to send a direct message to '${msg.author.username}#${msg.author.discriminator}'.`)
-			throw error
-		})
-	} else {
+
+	if (!com && msg.guild && config.deletemsg === "TRUE") {
+		deletemsg = true
+	} else if (com && msg.guild && com.deletemsg === "TRUE") {
+		deletemsg = true
+	}
+
+	if (replytomsg) {
 		await msg.reply(text).catch(error => {
 			reportError(`Error: Unable to send a reply to '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error
 		})
 	}
-	if (msg.guild && deletemsg) {
+
+	if (replyindm) {
+		await msg.author.send(text).catch(error => {
+			reportError(`Error: Unable to send a direct message to '${msg.author.username}#${msg.author.discriminator}'.`)
+			throw error
+		})
+	}
+
+	if (deletemsg) {
 		await msg.delete().catch(error => {
 			reportError(`Error: Unable to delete the message from '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error
@@ -411,24 +414,21 @@ async function msgReply(msg, com, text) {
 
 async function msgError(msg, com, text) {
 	const config = getConfig()
-	if (!config.ownertag) {
+	if (!config.errorchannelid && !config.erroruserid) {
 		msgReply(msg, com, text)
 		return
 	}
 	console.log(`<= ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
 	reportError(text)
-	const types = ["info", "data", "flag", "text", "number", "date"]
+
 	let deletemsg = false
-	if (!com || !types.find(type => com.type === type)) {
-		if (config.deletemsg === "TRUE") {
-			deletemsg = true
-		}
-	} else {
-		if (com.deletemsg === "TRUE") {
-			deletemsg = true
-		}
+	if (!com && msg.guild && config.deletemsg === "TRUE") {
+		deletemsg = true
+	} else if (com && msg.guild && com.deletemsg === "TRUE") {
+		deletemsg = true
 	}
-	if (msg.guild && deletemsg) {
+
+	if (deletemsg) {
 		await msg.delete().catch(error => {
 			reportError(`Error: Unable to delete the message from '${msg.author.username}#${msg.author.discriminator}'.`)
 			throw error

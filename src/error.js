@@ -6,14 +6,22 @@ const lastReminder = {} // To prevent spamming reminders.
 async function reportError(text) {
 	console.error(`\x1b[31m${text}\x1b[00m`) // Apply red color to errors.
 	const config = getConfig()
-	if (!config.ownertag) {
+	const client = getClient()
+
+	if (config.errorchannelid) {
+		const output = client.channels.cache.find(channel => config.errorchannelid === channel.id)
+		if (output) {
+			output.send(text)
+		}
+	}
+
+	if (!config.erroruserid) {
 		return
 	}
 	if (lastReminder[`reportError${text}`] && Date.now() < lastReminder[`reportError${text}`] + 600000) {
 		return
 	}
-	const client = getClient()
-	const owner = client.users.cache.find(user => config.ownertag === `${user.username}#${user.discriminator}`)
+	const owner = client.users.cache.find(user => config.erroruserid === user.id)
 	if (!owner) {
 		return
 	}

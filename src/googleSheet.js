@@ -3,11 +3,13 @@ const { clientEmail, privateKey, documentId, botConfig } = require("./environmen
 
 const document = new GoogleSpreadsheet(documentId)
 let config = [] // Contains loaded configuration settings.
+let ranks = [] // Contains available ranks with weight and command power.
 let commands = [] // Contains available commands.
 let outputSheet // Contains the output worksheet.
 let lastLoad = 0 // Timestamp for when the document was last fully loaded.
 
 const getConfig = () => config
+const getRanks = () => ranks
 const getCommands = () => commands
 const getOutputSheet = () => outputSheet
 
@@ -61,7 +63,7 @@ async function loadGoogleSheet(reportError) {
 	})
 
 	// Check for mandatory configuration settings.
-	const mandatoryConfigs = ["commandsheet", "outputsheet", "serverid", "discordtagcolumn"]
+	const mandatoryConfigs = ["serverid", "ranksheet", "commandsheet", "outputsheet", "allothersrankid", "leftserverrankid", "discordidcolumn"]
 	for (let i in mandatoryConfigs) {
 		const mandatoryConfig = mandatoryConfigs[i]
 		if (!config[mandatoryConfig]) {
@@ -69,6 +71,22 @@ async function loadGoogleSheet(reportError) {
 			return
 		}
 	}
+
+	// Load the ranks.
+	if (!sheets[config.ranksheet]) {
+		reportError(`Error: Cannot find rank worksheet with title '${config.ranksheet}'.`)
+		return
+	}
+	const rankRows = await sheets[config.ranksheet].getRows().catch(error => {
+		reportError(`Error: Unable to load ranks from the Google Sheets document.`)
+		throw error
+	})
+	ranks = []
+	rankRows.forEach(row => {
+		if (row.rankid) {
+			ranks.push(row)
+		}
+	})
 
 	// Load the Commands.
 	if (!sheets[config.commandsheet]) {
@@ -96,4 +114,4 @@ async function loadGoogleSheet(reportError) {
 	return true
 }
 
-module.exports = { authServiceWorker, loadGoogleSheet, getConfig, getCommands, getOutputSheet }
+module.exports = { authServiceWorker, loadGoogleSheet, getConfig, getRanks, getCommands, getOutputSheet }

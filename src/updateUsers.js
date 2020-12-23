@@ -1,5 +1,6 @@
 const { loadGoogleSheet, getConfig, getOutputSheet } = require("./googleSheet")
 const { getClient } = require("./discordBot")
+const { findRank } = require("./findRank.js")
 const { reportError } = require("./error")
 
 async function updateUsers() {
@@ -18,6 +19,7 @@ async function updateUsers() {
 		reportError(`Error: I am not connected to the Server with the configured Server ID.`)
 		return
 	}
+	const members = await guild.members.fetch()
 
 	// Load the Output sheet.
 	const outputSheet = getOutputSheet()
@@ -25,34 +27,36 @@ async function updateUsers() {
 		reportError(`Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
 		return
 	}
+	//const fetchedMembers = await guild.members.fetch()
+
 
 	// Check all rows.
 	const outputRows = await outputSheet.getRows()
 	outputRows.forEach(async outputRow => {
 
 		// Check if it is an actual user row.
-		const discordTag = outputRow[config.discordtagcolumn]
-		if (!discordTag || discordTag.indexOf("#") === -1) {
+		const discordID = String(outputRow[config.discordidcolumn])
+		if (!discordID || discordID === "type" || discordID === "description") {
 			return
 		}
-		const member = await guild.members.cache.find(user => discordTag === `${user.user.username}#${user.user.discriminator}`)
-		if (!member) {
-			if (config.discordrankcolumn) {
-				outputRow[config.discordrankcolumn] = "<not found>"
-			}
-			if (config.rankvaluecolumn) {
-				outputRow[config.rankvaluecolumn] = -1
-			}
-		} else {
-			if (config.discordnamecolumn) {
-				outputRow[config.discordnamecolumn] = String(member.nickname || member.user.username)
-			}
-			if (config.discordrankcolumn) {
-				outputRow[config.discordrankcolumn] = String(member.roles.highest.name)
-			}
-			if (config.rankvaluecolumn) {
-				outputRow[config.rankvaluecolumn] = String(member.roles.highest.rawPosition)
-			}
+		const member = members.find(memberEntry => memberEntry.id === discordID)
+		const rankData = findRank(member)
+
+		// Update the row values.
+		if (member && config.discordtagcolumn) {
+			outputRow[config.discordtagcolumn] = String(`${member.user.username}#${member.user.discriminator}`)
+		}
+		if (member && config.discordnamecolumn) {
+			outputRow[config.discordnamecolumn] = String(member.nickname || member.user.username)
+		}
+		if (config.discordrankcolumn) {
+			outputRow[config.discordrankcolumn] = String(rankData.rankid)
+		}
+		if (config.ranknamecolumn) {
+			outputRow[config.ranknamecolumn] = String(rankData.rank)
+		}
+		if (config.rankweightcolumn) {
+			outputRow[config.rankweightcolumn] = Number(rankData.weight)
 		}
 		await outputRow.save().catch(error => {
 			reportError(`Error: Unable to save output data to the Google Sheets document.`)
