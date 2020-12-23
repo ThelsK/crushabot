@@ -38,6 +38,37 @@ function findRank(member) {
 		}
 		return rankData
 	}
+
+	// Rebuild the rankData, so that adjusting the weight or command value does not adjust the original data.
+	rankData = {
+		rankid: rankData.rankid,
+		rank: rankData.rank,
+		weight: 0,
+		command: 0,
+	}
+
+	// Calculate the weight and command value for users that match multiple ranks.
+	ranks.forEach(rank => {
+		if (member.roles.cache.find(role => rank.rankid === role.id)) {
+
+			// Update the weight.
+			if (config.addweight === "TRUE") {
+				rankData.weight += rank.weight
+			} else if (rankData.weight < rank.weight) {
+				rankData.weight = rank.weight
+			}
+
+			// Update the command value.
+			if (rankData.command < rank.command) {
+				rankData.command = rank.command
+			}
+		}
+	})
+
+	// Adhere to maximum weight.
+	if (config.maxweight && rankData.weight > config.maxweight) {
+		rankData.weight = config.maxweight
+	}
 	return rankData
 }
 
