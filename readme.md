@@ -328,6 +328,7 @@ If you name the Configuration worksheet to something other than "botconfig", you
 	* Add new configuration settings: "errorchannelid", "ranksheet", "allothersrankid", "leftserverrankid", "discordidcolumn", "ranknamecolumn", "rankweightcolumn", "rollsheet", "entriestolist" and "allowduplicates". See "General Configuration" above on how to configure these settings.
 	* Fix: In certain situations, the Bot did not prevent a command in the channel from being deleted. This has been fixed.
 	* Fix: The Bot now replies to all direct messages, including direct messages that do not start with "!".
+	* Fix: The Bot now re-authenticates with the Google API on a daily basis, to prevent the authentication from expiring.
 * 1.0.3
 	* Fix: Arrayformulas are no longer accepted as valid commands.
 	* Fix: Commands no longer overwrite arrayformulas.
