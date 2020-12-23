@@ -311,6 +311,20 @@ If you name the Configuration worksheet to something other than "botconfig", you
 
 ## _Version History_
 
+* 1.1.0
+	* Overhaul the way the Bot determines a user's rank. It no longer selects the user's highest rank, but instead compares the user's rank against a whitelist of ranks.
+		* A new Ranks worksheet tab must be added to the Google spreadsheet with 4 columns: "rankid", "rank", "weight" and "command".
+		* The Bot goes through this list from top to bottom, until it finds a rankid that matches one of the user's ranks, and assigns that rank to the user.
+		* If none of the whitelisted ranks are found, but the user is still on the server, the Bot assigns the "allothers" rank instead.
+		* If the user is not on the server or has left the server, the Bot assigns the "leftserver" rank instead.
+		* The weight value from this whitelist is now included with the output. See "Available User Ranks" above for more information.
+	* Add an option to output configuration errors to a particular channel instead of or in addition to outputting these errors to a particular user.
+	* Switch to user IDs instead of user Tags as the primary key for storing data on the output sheet. Note that this invalidates all older information on the output sheet.
+	* Rename the "inputchannel" configuration setting to "inputchannelid". In addition, this configuration setting now uses the channel id instead of the channel name.
+	* Rename the "ownertag" configuration setting to "erroruserid". In addition, this configuration setting now uses the user id instead of the user tag.
+	* Remove the "rankvaluecolumn" configuration setting.
+	* Add new configuration settings: "errorchannelid", "ranksheet", "allothersrankid", "leftserverrankid", "discordidcolumn", "ranknamecolumn", "rankweightcolumn", "rollsheet", "entriestolist" and "allowduplicates". See "General Configuration" above on how to configure these settings.
+	* Fix: In certain situations, the Bot did not prevent a command in the channel from being deleted. This has been fixed.
 * 1.0.3
 	* Fix: Arrayformulas are no longer accepted as valid commands.
 	* Fix: Commands no longer overwrite arrayformulas.
