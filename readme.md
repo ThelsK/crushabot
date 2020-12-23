@@ -211,18 +211,24 @@ The configuration settings "serverid", "ranksheet", "commandsheet", "outputsheet
 	* This is the name of the column on the output Worksheet that contains the Rank Name of the highest matching rank found on the Ranks worksheet. This value is automatically updated every hour. If left blank, this data is not stored. This is included to make it easier to recognize ranks.
 * rankweightcolumn (Optional)
 	* This is the name of the column on the output Worksheet that contains the Rank Weight of the highest matching rank found on the Ranks worksheet. This value is automatically updated every hour. If left blank, this data is not stored. When copying the template, this value is used to determine the likelyhood of this row being randomly selected on the roll worksheet.
+* dateformat (Optional)
+	* This is the mask used to display dates. If left blank, "dddd dd mmmm yyyy, HH:MM:ss" is used as the mask. See https://npmjs.com/package/dateformat for available mask options. Do not include "UTC:" in the mask.
 * textenabled (Optional)
 	* When flags are displayed as part of a data command, flags that are set to true will list this as their value. In addition, this is an acceptable parameter for a data command (case insensitive). if left blank, flags that are set to true will list "On" as their value.
 * textdisabled (Optional)
 	* When flags are displayed as part of a data command, flags that are set to false will list this as their value. In addition, this is an acceptable parameter for a data command (case insensitive). if left blank, flags that are set to false will list "Off" as their value.
-* dateformat (Optional)
-	* This is the mask used to display dates. If left blank, "dddd dd mmmm yyyy, HH:MM:ss" is used as the mask. See https://github.com/felixge/node-dateformat for available mask options. Do not include "UTC:" in the mask.
-* rollsheet (Optional, Template only)
+* defaultflagvalue (Optional)
+	* When a user has not yet performed a particular flag data command, this value is used instead. This both affects the feedback to the user, and whether the user can be selected at random by the Roll buttons (Template only). If left blank, "FALSE" is used instead.
+* addweight (Optional)
+	* When a user matches multiple ranks on the Ranks worksheet, if this is set to "TRUE", the user's weight is equal to the weight of all matching ranks added together. If set to "FALSE" or left blank, the user's weight is equal to the weight of the matching rank with the highest weight. Note: this does not include the weight of the "allothersrankid" and "leftserverrankid" ranks.
+* maxweight (Optional)
+	* When this is given a value, and a user has a higher weight than this value, that user's weight will be reduced to this value. This is meant to provide a cap to the weights that can be added of adding weights together, but also applies when the "addweight" setting is disabled. Note: this does not affect users with the "allothersrankid" and "leftserverrankid" ranks.
+* rollsheet (Mandatory, Template only)
 	* This value is not used by the bot at all. When copying the template, this value is used by the Roll worksheet to determine to which worksheet the results of the Roll buttons will be posted.
 * entriestolist (Optional, Template only)
-	* This value is not used by the bot at all. When copying the template, this value is used by the Roll worksheet to determine how many entries to list as part of a single roll.
+	* This value is not used by the bot at all. When copying the template, this value is used by the Roll worksheet to determine how many entries to list as part of a single roll. If left blank, 10 entries will be listed.
 * allowduplicates (Optional, Template only)
-	* This value is not used by the bot at all. When copying the template, this value is used by the Roll worksheet to determine if a single entry can be selected multiple times during a single roll.
+	* This value is not used by the bot at all. When copying the template, this value is used by the Roll worksheet to determine if a single entry can be selected multiple times during a single roll. If left blank, duplicates are not allowed.
 
 ### Available User Ranks
 
@@ -230,7 +236,9 @@ The name of the Worksheet that contains the available user ranks is specified in
 
 The available user commands sheet must have cells on the first row with the texts "rankid", "rank", "weight" and "command".
 
-Each rank must be placed on its own row, with the applicable values in the column with the matching header text. The ranks must be listed from most to least important. If a user matches multiple ranks in the list, that user uses the values of the rank listed highest on the worksheet, even if other ranks have a higher weight or command value. Note that you only need to include ranks with a unique weight and command value. Ranks that don't give their users any privileges can be omitted.
+Each rank must be placed on its own row, with the applicable values in the column with the matching header text. Note that you only need to include ranks with a unique weight and command value. Ranks that don't give their users any privileges can be omitted.
+
+When checking a user's rank, if the user matches multiple ranks, the user receives the rank id and description that are listed first. However, the user receives the weight of the matching rank with the highest weight value, and the command value of the matching rank with the highest command value. If "addweight" is set to "TRUE", the user instead receives the weight of all matching ranks added together.
 
 You must also include two special ranks, with the ids listed for "allothersrankid" and "leftserverrankid". These two fictional ranks are used for people that do not match any of the other ranks and people that are not connected to the server. The position of these two ranks in the list does not matter. They are skipped by anyone that matches any of the other available ranks.
 
@@ -287,7 +295,11 @@ Each command must be placed on its own row, with the applicable values in the co
 	* For flag, text, number and date commands, this is the name of the column on the output Worksheet to which this data will be stored.
 	* For alias command, this is the command that the alias refers to. Remember that it cannot refer to another alias.
 * reply
-	* When the Bot replies to the command, it will start the reply with this text.
+	* When the Bot replies to the command, it will start the reply with this text, but only if the user performed the command successfully.
+* suffix
+	* When the Bot replies to the command, it will end the reply with this text. If the reply includes user data, the suffix is added after the user data.
+	* The suffix is added without spacing or newlines. Any desired spacing or newlines need to be included in the suffix.
+	* The suffix is only added to replies to successful commands. The suffix can be left blank.
 
 ### Value Output
 
