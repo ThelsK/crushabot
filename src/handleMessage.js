@@ -87,13 +87,13 @@ async function handleMessage(msg) {
 
 	// Check if the command is allowed as a channel message.
 	if (msg.guild && com.inchannel !== "TRUE") {
-		msgReply(msg, com, `Command '${command} is not allowed as a channel message. Try it as a direct message.`)
+		msgReply(msg, com, `Command '${command}' is not allowed as a channel message. Try it as a direct message.`)
 		return
 	}
 
 	// Check if the command is allowed as a direct message.
 	if (!msg.guild && com.indm !== "TRUE") {
-		msgReply(msg, com, `Command '${command} is not allowed as a direct message. Try it as a channel message.`)
+		msgReply(msg, com, `Command '${command}' is not allowed as a direct message. Try it as a channel message.`)
 		return
 	}
 
