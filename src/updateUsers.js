@@ -27,11 +27,10 @@ async function updateUsers() {
 		reportError(`Error: Discord Tag column header '${config.discordtagcolumn}' not found.`)
 		return
 	}
-	//const fetchedMembers = await guild.members.fetch()
-
 
 	// Check all rows.
 	const outputRows = await outputSheet.getRows()
+	let delay = 0
 	outputRows.forEach(async outputRow => {
 
 		// Check if it is an actual user row.
@@ -58,10 +57,15 @@ async function updateUsers() {
 		if (config.rankweightcolumn) {
 			outputRow[config.rankweightcolumn] = Number(rankData.weight)
 		}
-		await outputRow.save().catch(error => {
-			reportError(`Error: Unable to save output data to the Google Sheets document.`)
-			throw error
-		})
+
+		// Save the update.
+		delay += 2000
+		setTimeout(function () {
+			outputRow.save().catch(error => {
+				reportError(`Error: Unable to save output data to the Google Sheets document.`)
+				throw error
+			})
+		}, delay)
 	})
 }
 
