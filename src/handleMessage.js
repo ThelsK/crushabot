@@ -396,17 +396,32 @@ async function msgReply(msg, com, text) {
 		console.log(`=> ${msg.author.username}#${msg.author.discriminator}: ${text}`)
 	}
 
+	// Split the text in chunks of 2000 characters.
+	const output = splittext(text)
+
 	if (replytomsg) {
-		await msg.reply(text).catch(error => {
-			reportError(`Error: Unable to send a reply to '${msg.author.username}#${msg.author.discriminator}'.`)
-			throw error
+		let delay = 0
+		output.forEach(async section => {
+			setTimeout(async function () {
+				await msg.reply(section).catch(error => {
+					reportError(`Error: Unable to send a reply to '${msg.author.username}#${msg.author.discriminator}'.`)
+					throw error
+				})
+			}, delay)
+			delay += 1000
 		})
 	}
 
 	if (replyindm) {
-		await msg.author.send(text).catch(error => {
-			reportError(`Error: Unable to send a direct message to '${msg.author.username}#${msg.author.discriminator}'.`)
-			throw error
+		let delay = 0
+		output.forEach(async section => {
+			setTimeout(async function () {
+				await msg.author.send(section).catch(error => {
+					reportError(`Error: Unable to send a direct message to '${msg.author.username}#${msg.author.discriminator}'.`)
+					throw error
+				})
+			}, delay)
+			delay += 1000
 		})
 	}
 
@@ -440,6 +455,28 @@ async function msgError(msg, com, text) {
 			throw error
 		})
 	}
+}
+
+// Discord does not allow messages longer than 2000 characters.
+function splittext(text) {
+	const output = []
+	let remain = String(text).trim()
+
+	while (remain) {
+		if (remain.length <= 2000) {
+			output.push(remain)
+			remain = ""
+		} else {
+			let section = remain.substr(0, 2000)
+			let newline = section.lastIndexOf("\n")
+			if (newline > 0) {
+				section = `_${remain.substr(0, newline)}`.trim().substr(1) // Only trim the end of the message, not the start.
+			}
+			output.push(section)
+			remain = remain.substr(section.length)
+		}
+	}
+	return output
 }
 
 module.exports = { handleMessage }
